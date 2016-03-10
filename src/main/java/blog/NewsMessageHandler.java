@@ -15,7 +15,7 @@ public class NewsMessageHandler {
     private static Logger logger = LoggerFactory.getLogger(NewsMessageHandler.class);
 
     public void handleMessage(Message<List<NewsItem>> message) {
-        logger.debug("At {} I received a message with feedid {} and payload {}",new String[] {
+        logger.info("At {} I received a message with feedid {} and payload {}",new String[] {
                 new Date(message.getHeaders().getTimestamp()).toString(),
                 message.getHeaders().get("feedid",String.class),
                 message.getPayload().toString()});
