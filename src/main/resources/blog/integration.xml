@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
+
+    <int:inbound-channel-adapter id="newsInput" ref="newsReader">
+        <int:poller fixed-rate="1" time-unit="SECONDS" max-messages-per-poll="1"/>
+    </int:inbound-channel-adapter>
+
+    <bean id="newsReader" class="blog.NewsReader">
+        <property name="fetcherListener">
+            <bean class="blog.helper.FetcherEventListenerImpl"/>
+        </property>
+        <property name="urls">
+            <list>
+                <value>http://www.gridshore.nl/feed/</value>
+                <value>https://spring.io/blog.atom</value>
+                <value>http://feeds.foxnews.com/foxnews/video?format=xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="newsItemTransformer" class="blog.NewsItemTransformer"/>
+
+    <bean id="newsHandler" class="blog.NewsMessageHandler"/>
+
+    <int:transformer input-channel="newsInput" output-channel="newsOutput" ref="newsItemTransformer"/>
+
+    <int:outbound-channel-adapter id="newsOutput" ref="newsHandler"/>
+
+</beans>
