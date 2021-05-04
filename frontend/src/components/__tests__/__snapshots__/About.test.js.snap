@@ -1,0 +1,11 @@
+exports[`About.test.js renders as expected 1`] = `
+<div
+  className="container">
+  <h1>
+    About
+  </h1>
+  <p>
+    Project made by iMckify.
+  </p>
+</div>
+`;
