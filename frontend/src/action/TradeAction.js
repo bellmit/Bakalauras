@@ -7,18 +7,19 @@ export const getTradesResponse = (trades) => ({
 	trades,
 })
 
-export function getTradesAction() {
-	return (dispatch) => {
-		dispatch(ApiCallBeginAction())
-
-		return TradeApi.getAllTrades()
-			.then((trades) => {
-				dispatch(getTradesResponse(trades))
-			})
-			.catch((error) => {
-				throw error
-			})
-	}
+// export const getTrades = () =>
+// 	TradeApi.getAllTrades().catch((error) => {
+// 		throw error
+// 	})
+export const getTrades = () => (dispatch) => {
+	dispatch(ApiCallBeginAction())
+	return TradeApi.getAllTrades()
+		.then((trades) => {
+			dispatch(getTradesResponse(trades))
+		})
+		.catch((error) => {
+			throw error
+		})
 }
 
 export const addNewTradeResponse = () => ({

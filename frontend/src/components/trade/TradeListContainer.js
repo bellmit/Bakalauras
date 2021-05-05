@@ -1,22 +1,33 @@
+/* eslint-disable */
 import React from 'react'
-import PropTypes from 'prop-types'
+// import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { bindActionCreators } from 'redux'
 import toastr from 'toastr'
+// import { getTrades} from '../../action/TradeAction'
+import { bindActionCreators } from 'redux';
 import * as tradeAction from '../../action/TradeAction'
+
 import TradeList from './TradeList'
 
 export class TradeListContainer extends React.Component {
-	constructor() {
-		super()
+	constructor(props) {
+		super(props)
 
 		this.state = { selectedTradeId: undefined }
 	}
 
+	// componentDidMount() {
+	// 	getTrades()
+	// 		.catch((error) => {
+	// 			toastr.error(error)
+	// 	})
+	// }
+
 	componentDidMount() {
-		this.props.action.getTradesAction().catch((error) => {
-			toastr.error(error)
-		})
+		this.props.action.getTrades()
+			.catch((error) => {
+				toastr.error(error)
+			})
 	}
 
 	handleAddTrade = () => {
@@ -116,10 +127,18 @@ const mapDispatchToProps = (dispatch) => ({
 	action: bindActionCreators(tradeAction, dispatch),
 })
 
-TradeListContainer.propTypes = {
-	trades: PropTypes.array,
-	action: PropTypes.object.isRequired,
-	history: PropTypes.object.isRequired,
-}
+// const mapDispatchToProps = dispatch => {
+// 	return {
+// 		getTradesActionProp: () =>
+// 			getTradesAction()(dispatch)
+// 	};
+// };
 
+// TradeListContainer.propTypes = {
+// 	trades: PropTypes.array,
+// 	tradeAction: PropTypes.object.isRequired,
+// 	history: PropTypes.object.isRequired,
+// }
+
+// export default connect(mapStateToProps)(TradeListContainer)
 export default connect(mapStateToProps, mapDispatchToProps)(TradeListContainer)

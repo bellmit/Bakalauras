@@ -8,7 +8,7 @@ import 'bootstrap/dist/js/bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'toastr/build/toastr.min.css'
 import 'font-awesome/css/font-awesome.css'
-import 'react-bootstrap-table/dist/react-bootstrap-table.min.css'
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css'
 
 const store = configureStore()
 

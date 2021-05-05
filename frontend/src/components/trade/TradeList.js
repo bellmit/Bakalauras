@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table'
+import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table-next'
 
 const getCaret = (direction) => {
 	if (direction === 'asc') {
