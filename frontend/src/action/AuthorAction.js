@@ -1,25 +1,22 @@
-import * as ActionType from './ActionType';
-import AuthorApi from '../api/AuthorApi';
-import { ApiCallBeginAction } from './ApiAction';
+import * as ActionType from './ActionType'
+import AuthorApi from '../api/AuthorApi'
+import { ApiCallBeginAction } from './ApiAction'
 
-
-export const getAuthorsResponse = authors => ({
-    type: ActionType.GET_AUTHORS_RESPONSE,
-    authors
-});
-
-
+export const getAuthorsResponse = (authors) => ({
+	type: ActionType.GET_AUTHORS_RESPONSE,
+	authors,
+})
 
 export function getAuthorsAction() {
-    return dispatch => {
+	return (dispatch) => {
+		dispatch(ApiCallBeginAction())
 
-        dispatch(ApiCallBeginAction());
-
-        return AuthorApi.getAllAuthors()
-            .then(authors => {
-                dispatch(getAuthorsResponse(authors));
-            }).catch(error => {
-                throw error;
-            });
-    };
+		return AuthorApi.getAllAuthors()
+			.then((authors) => {
+				dispatch(getAuthorsResponse(authors))
+			})
+			.catch((error) => {
+				throw error
+			})
+	}
 }

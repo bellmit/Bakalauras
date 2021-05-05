@@ -1,20 +1,19 @@
-//This is to ensure that we can see the entirety of the store
+// This is to ensure that we can see the entirety of the store
 
 export default {
-    authorReducer: {
-        authors: []
-    },
+	authorReducer: {
+		authors: [],
+	},
 
-    tradesReducer: {
-        trades: []
-    },
+	tradesReducer: {
+		trades: [],
+	},
 
-    selectedTradeReducer: {
-        trade: undefined
-    },
+	selectedTradeReducer: {
+		trade: undefined,
+	},
 
-    apiReducer: {
-        apiCallsInProgress: 0
-    }
-
-};
+	apiReducer: {
+		apiCallsInProgress: 0,
+	},
+}

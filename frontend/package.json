@@ -88,9 +88,13 @@
     },
     "plugins": ["react", "prettier"],
     "rules": {
-      "react/forbid-prop-types": "warn",
-      "react/require-default-props": "warn",
-      "react/jsx-filename-extension": "off",
+      "import/no-mutable-exports": "warn",
+      "react/destructuring-assignment": "off",
+      "react/no-access-state-in-setstate": "warn",
+      "no-use-before-define": "off",
+      "no-param-reassign": "off",
+      "react/forbid-prop-types": "off",
+      "react/require-default-props": "off",
       "prettier/prettier": [
         "error",
         {
@@ -102,6 +106,9 @@
           "useTabs": true
         }
       ],
+      "func-names": "off",
+      "react/jsx-filename-extension": "off",
+      "react/jsx-props-no-spreading": "warn",
       "no-underscore-dangle": "off",
       "react/jsx-one-expression-per-line": "off",
       "import/prefer-default-export": "off",
