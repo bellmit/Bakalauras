@@ -10,44 +10,110 @@
     "Portfolio"
   ],
   "dependencies": {
-    "@babel/polyfill": "7.4.4",
-    "@material-ui/core": "3.9.2",
-    "@material-ui/icons": "3.0.2",
-    "axios": "0.19.0",
-    "jwt-decode": "2.2.0",
-    "prop-types": "15.7.2",
-    "react-custom-scrollbars": "4.2.1",
-    "history": "5.0.0",
+    "@material-ui/core": "^4.11.4",
+    "@material-ui/icons": "^4.11.2",
+    "axios": "^0.21.1",
     "bootstrap": "4.0.0-alpha.6",
+    "eslint-config-react-app": "^6.0.0",
     "font-awesome": "^4.7.0",
+    "history": "5.0.0",
     "jquery": "^3.2.1",
+    "jwt-decode": "2.2.0",
     "lodash": "^4.17.4",
-    "react": "^15.4.2",
-    "react-bootstrap-table": "^3.4.1",
-    "react-dom": "^15.4.2",
-    "react-redux": "^5.0.5",
-    "react-router-dom": "^4.1.1",
-    "redux": "^3.7.0",
-    "redux-form": "^6.8.0",
-    "redux-thunk": "^2.2.0",
+    "peerdeps": "^1.1.1",
+    "prop-types": "^15.7.2",
+    "react": "17.0.2",
+    "react-bootstrap-table": "^4.3.1",
+    "react-dom": "^17.0.2",
+    "react-redux": "^7.2.4",
+    "react-router-dom": "^5.2.0",
+    "redux": "^4.1.0",
+    "redux-form": "^8.3.7",
+    "redux-thunk": "^2.3.0",
     "tether": "^1.4.0",
-    "toastr": "^2.1.2",
-    "dotenv-webpack": "7.0.2"
+    "toastr": "^2.1.2"
   },
   "devDependencies": {
-    "coveralls": "^2.13.1",
+    "coveralls": "^3.1.0",
     "enzyme": "^2.8.2",
     "enzyme-to-json": "^1.5.1",
+    "eslint": "^7.25.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-prettier": "^3.4.0",
+    "eslint-plugin-react": "^7.23.2",
+    "eslint-plugin-react-hooks": "^4.2.0",
     "nock": "^9.0.13",
-    "react-addons-test-utils": "^15.4.2",
-    "react-scripts": "0.9.5",
+    "prettier": "^2.2.1",
+    "react-scripts": "^4.0.3",
     "redux-mock-store": "^1.2.3"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "lint": "eslint *.js **/*.js",
     "coverage": "react-scripts test --env=jsdom --coverage",
     "eject": "react-scripts eject"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es2021": true
+    },
+    "extends": [
+      "airbnb",
+      "prettier"
+    ],
+    "parser": "babel-eslint",
+    "parserOptions": {
+      "ecmaFeatures": {
+        "jsx": true
+      },
+      "ecmaVersion": 2018,
+      "sourceType": "module"
+    },
+    "plugins": ["react", "prettier"],
+    "rules": {
+      "react/forbid-prop-types": "warn",
+      "react/require-default-props": "warn",
+      "react/jsx-filename-extension": "off",
+      "prettier/prettier": [
+        "error",
+        {
+          "printWidth": 80,
+          "trailingComma": "es5",
+          "semi": false,
+          "jsxSingleQuote": true,
+          "singleQuote": true,
+          "useTabs": true
+        }
+      ],
+      "no-underscore-dangle": "off",
+      "react/jsx-one-expression-per-line": "off",
+      "import/prefer-default-export": "off",
+      "jsx-a11y/interactive-supports-focus": "off",
+      "jsx-a11y/click-events-have-key-events": "off",
+      "radix": "off"
+    },
+    "globals": {
+      "fetch": "writable",
+      "document": "writable",
+      "window": "writable",
+      "localStorage": true
+    }
   }
 }
