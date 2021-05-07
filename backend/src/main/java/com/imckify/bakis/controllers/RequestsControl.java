@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/Requests")
@@ -28,6 +29,17 @@ public class RequestsControl {
         return ResponseEntity.ok(
                 this.RequestsRepo.findByAnalystsIDIsNull()
         );
+    }
+
+    @GetMapping("/investor/{id}")
+    public ResponseEntity<List<Requests>> getInvestorRequests(@PathVariable(value = "id") int id){
+        Optional<List<Requests>> Requests = this.RequestsRepo.findByInvestorsID(id);
+
+        if(Requests.isPresent()){
+            return  ResponseEntity.ok().body(Requests.get());
+        } else {
+            return ResponseEntity.ok().build();
+        }
     }
 
     @GetMapping("/{id}")
