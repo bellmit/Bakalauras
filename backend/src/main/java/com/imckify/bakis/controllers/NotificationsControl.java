@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/Notifications")
@@ -21,6 +22,17 @@ public class NotificationsControl {
         return ResponseEntity.ok(
                 this.NotificationsRepo.findAll()
         );
+    }
+
+    @GetMapping("/investor/{id}")
+    public ResponseEntity<List<Notifications>> getInvestorNotifications(@PathVariable(value = "id") int id){
+        Optional<List<Notifications>> Notifications = this.NotificationsRepo.findByInvestorsID(id);
+
+        if(Notifications.isPresent()){
+            return  ResponseEntity.ok().body(Notifications.get());
+        } else {
+            return ResponseEntity.ok().build();
+        }
     }
 
     @GetMapping("/{id}")

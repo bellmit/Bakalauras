@@ -25,10 +25,14 @@ public class RequestsControl {
     }
 
     @GetMapping("/unapproved")
-    public ResponseEntity<List<Requests>> getUnapprovedRequests() {   /////////////////////////////////////////////////
-        return ResponseEntity.ok(
-                this.RequestsRepo.findByAnalystsIDIsNull()
-        );
+    public ResponseEntity<List<Requests>> getUnapprovedRequests() {
+        Optional<List<Requests>> Requests = this.RequestsRepo.findByAnalystsIDIsNull();
+
+        if(Requests.isPresent()){
+            return  ResponseEntity.ok().body(Requests.get());
+        } else {
+            return ResponseEntity.ok().build();
+        }
     }
 
     @GetMapping("/investor/{id}")
