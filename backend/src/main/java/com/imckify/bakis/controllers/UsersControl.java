@@ -6,6 +6,7 @@ import com.imckify.bakis.exceptions.ResourceNotFoundException;
 import com.imckify.bakis.models.Users;
 import com.imckify.bakis.repos.UsersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +29,15 @@ public class UsersControl {
 
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    @Value("${spring.datasource.url}")
+    private String dbUrl;
+
+    @Value("${spring.datasource.username}")
+    private String dbUsername;
+
+    @Value("${spring.datasource.password}")
+    private String dbPassword;
 
     //>>>>>>>>>>>>>>>>>>        Login
     @PostMapping("/login")
@@ -127,7 +137,7 @@ public class UsersControl {
         try {
             String sql = "INSERT INTO Portfolios (`value`, `changeValue`, `date`) VALUES (NULL,NULL,NULL)";
             Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection con= DriverManager.getConnection("jdbc:mysql://localhost:3306/bakisDB","phpmyadmin","root");
+            Connection con= DriverManager.getConnection(dbUrl,dbUsername,dbPassword);
             PreparedStatement stmt =con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.execute();
             try(ResultSet rs = stmt.getGeneratedKeys()) {
