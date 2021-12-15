@@ -17,9 +17,9 @@
         <property name="urls">
             <list>
                 <value>https://www.sec.gov/Archives/edgar/xbrlrss.all.xml</value>
-                <value>https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&amp;CIK=&amp;type=&amp;company=&amp;dateb=&amp;owner=include&amp;start=0&amp;count=40&amp;output=atom</value>
-<!--                <value>https://spring.io/blog.atom</value>-->
-<!--                <value>http://feeds.foxnews.com/foxnews/video?format=xml</value>-->
+                <value>https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&amp;CIK=&amp;type=&amp;company=&amp;dateb=&amp;owner=include&amp;start=0&amp;count=10&amp;output=atom</value>
+                <value>https://spring.io/blog.atom</value>
+                <value>http://feeds.foxnews.com/foxnews/video?format=xml</value>
             </list>
         </property>
     </bean>

@@ -8,9 +8,6 @@ import org.springframework.messaging.Message;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Created by Bikash on 3/9/2016.
- */
 public class NewsItemTransformer {
 
     public Message<List<NewsItem>> transform(Message<List<SyndFeed>> syndFeedMessage) {

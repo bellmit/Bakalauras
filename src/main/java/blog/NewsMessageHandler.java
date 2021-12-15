@@ -7,9 +7,6 @@ import org.springframework.messaging.Message;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by Bikash on 3/9/2016.
- */
 public class NewsMessageHandler {
     private static Logger logger = LoggerFactory.getLogger(NewsMessageHandler.class);
 
@@ -18,7 +15,7 @@ public class NewsMessageHandler {
         String date = new Date(message.getHeaders().getTimestamp()).toString();
         logger.info("At {} received a message with feedid {} and payload:", date, message.getHeaders().get("feedid",String.class));
         for (int i = 0; i < 5; i++) {
-            System.out.println(news.get(i));
+            System.out.println(news.get(i).getTitle());
         }
         System.out.println("==============================================");
     }

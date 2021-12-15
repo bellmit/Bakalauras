@@ -5,9 +5,6 @@ import com.rometools.fetcher.FetcherListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by Bikash on 3/9/2016.
- */
 public class FetcherEventListenerImpl implements FetcherListener {
     private static Logger logger = LoggerFactory.getLogger(FetcherEventListenerImpl.class);
 

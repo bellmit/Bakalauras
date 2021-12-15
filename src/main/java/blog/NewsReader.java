@@ -20,9 +20,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Bikash on 3/9/2016.
- */
 public class NewsReader implements MessageSource, InitializingBean {
     private static Logger logger = LoggerFactory.getLogger(NewsReader.class);
     private FeedFetcherCache feedInfoCache;

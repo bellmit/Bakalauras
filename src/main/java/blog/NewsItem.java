@@ -1,8 +1,5 @@
 package blog;
 
-/**
- * Created by Bikash on 3/9/2016.
- */
 public class NewsItem {
     private String title;
     private String description;
