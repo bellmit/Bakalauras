@@ -1,12 +1,13 @@
 package com.imckify.bakis.controllers;
 
-import com.imckify.bakis.services.RSSReaderService;
+import com.imckify.bakis.services.FeedReaderService;
 import com.imckify.bakis.exceptions.ResourceNotFoundException;
 import com.imckify.bakis.models.Notifications;
 import com.imckify.bakis.repos.NotificationsRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,20 +24,19 @@ public class NotificationsControl {
     private NotificationsRepo NotificationsRepo;
 
     @Autowired
-    RSSReaderService RSSReaderService;
+    FeedReaderService FeedReaderService;
 
     @Autowired
     CacheManager cacheManager; // @EnableCaching init cacheManager by default
-
+    //    @Scheduled(cron = "0 0/10 6-22 ? * MON-FRI", zone = "EST") // Monday through Friday, 6am – 10pm EST Todo
+    //Todo kolkas visas listas yra kaip vienas value, reikia kiekviena newsa idet
 
     public static final Logger logger = LoggerFactory.getLogger(NotificationsControl.class);
 
-    //    @Scheduled(cron = "0 0/10 6-22 ? * MON-FRI", zone = "EST") // Monday through Friday, 6am – 10pm EST
     @Scheduled(fixedRate = 1000 * 30 * 1)
     private void pollPeriodically() {
-        List<Notifications> news = RSSReaderService.getRssEntries();
-//        this.cacheManager.getCache("rss");
-        //Todo kolkas visas listas yra kaip vienas value, reikia kiekviena newsa idet
+        List<Notifications> news = FeedReaderService.pollFeed();
+        Cache cache = this.cacheManager.getCache("feed");
 
         logger.info("Executing scheduled task {}()", new Object(){}.getClass().getEnclosingMethod().getName());
         for (int i = 0; i < 5; i++) {
