@@ -7,7 +7,7 @@
 		http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd">
 
     <int:inbound-channel-adapter id="newsInput" ref="newsReader">
-        <int:poller fixed-rate="600" time-unit="SECONDS" max-messages-per-poll="1"/>
+        <int:poller fixed-rate="5" time-unit="SECONDS" max-messages-per-poll="1"/>
     </int:inbound-channel-adapter>
 
     <bean id="newsReader" class="blog.NewsReader">
