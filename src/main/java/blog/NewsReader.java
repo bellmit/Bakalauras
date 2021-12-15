@@ -38,10 +38,11 @@ public class NewsReader implements MessageSource, InitializingBean {
     }
 
     private List<SyndFeed> obtainFeedItems() {
-        List<SyndFeed> feed = new ArrayList<>();
+        String userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36";
+        List<SyndFeed> feeds = new ArrayList<>();
         try {
             for (String url : urls) {
-                feed.add(feedFetcher.retrieveFeed(new URL(url)));
+                feeds.add(feedFetcher.retrieveFeed(userAgent, new URL(url)));
             }
         } catch (IOException e) {
             logger.error("IO Problem while retrieving feed", e);
@@ -50,7 +51,7 @@ public class NewsReader implements MessageSource, InitializingBean {
         } catch (FetcherException e) {
             logger.error("Fetcher Problem while retrieving feed", e);
         }
-        return feed;
+        return feeds;
     }
 
     @Override
