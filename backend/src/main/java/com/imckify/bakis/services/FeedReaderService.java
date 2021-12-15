@@ -1,14 +1,18 @@
 package com.imckify.bakis.services;
 
 import com.imckify.bakis.models.Notifications;
+import com.rometools.fetcher.FetcherException;
+import com.rometools.fetcher.impl.HttpClientFeedFetcher;
 import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
+import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.SyndFeedOutput;
 import com.rometools.rome.io.XmlReader;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +25,21 @@ public class FeedReaderService {
         String url2 = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&CIK=&type=&company=&dateb=&owner=include&start=0&count=40&output=atom";
         String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";
 
+//        try {
+//            XmlReader reader = new XmlReader(new URL(url));
+//            SyndFeedInput in = new SyndFeedInput();
+//            in.setPreserveWireFeed(true);
+//            SyndFeed feed = in.build(reader); System.out.println(feed.getTitle());
+//            news = parseRssFeed(feed);
+//        }  catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        HttpClientFeedFetcher feedFetcher = new HttpClientFeedFetcher();
         try {
-            XmlReader reader = new XmlReader(new URL(url));
-            SyndFeedInput in = new SyndFeedInput();
-            in.setPreserveWireFeed(true);
-            SyndFeed feed = in.build(reader); System.out.println(feed.getTitle());
-            news = parseRssFeed(feed);
-        }  catch (Exception e) {
+            SyndFeed feed = feedFetcher.retrieveFeed(new URL("http://habrahabr.ru/rss/"));
+            System.out.println(feed.getLink());
+        } catch (IllegalArgumentException | IOException | FeedException | FetcherException e) {
             e.printStackTrace();
         }
 
