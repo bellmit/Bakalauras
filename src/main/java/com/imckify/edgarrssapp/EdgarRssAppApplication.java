@@ -46,16 +46,6 @@ public class EdgarRssAppApplication {
     @Bean
     @InboundChannelAdapter("feedChannel")
     FeedEntryMessageSource feedEntrySource() throws MalformedURLException {
-//        UrlResource urlResource =
-//                new UrlResource(url) {
-//
-//                    @Override
-//                    protected void customizeConnection(HttpURLConnection connection) throws IOException {
-//                        super.customizeConnection(connection);
-//                        connection.setConnectTimeout(10000);
-//                        connection.setReadTimeout(5000);
-//                    }
-//                };
         FeedEntryMessageSource source = new FeedEntryMessageSource(new URL(url), "myKey");
         return source;
     }
