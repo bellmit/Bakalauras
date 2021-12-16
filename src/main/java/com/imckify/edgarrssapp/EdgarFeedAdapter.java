@@ -1,5 +1,17 @@
 package com.imckify.edgarrssapp;
 
+/**
+ * EdgarFeedAdapter class is an automatic scheduled background feed poller (otherwise known as adapter) of Edgar
+ * RSS/Atom filings. Every 60 seconds prints freshly published filings if there are any. Works between multiple
+ * Application runtime sessions. Before stopped, EdgarFeedAdapter updates target/classes/metadata-store.properties file
+ * with poll time of last entry and cache state of polled URLs and time polled.
+ *
+ * Feeds that can be subscribed:
+ *      atom_1.0 https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&count=10&output=atom
+ * and
+ *      rss_2.0  https://www.sec.gov/Archives/edgar/xbrlrss.all.xml
+ */
+
 import com.rometools.rome.feed.synd.SyndEntry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,13 +34,12 @@ import java.util.Date;
 @Configuration
 @EnableIntegration
 public class EdgarFeedAdapter {
-    String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";  // delete metadata-store.properties if no output
+    String url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&count=10&output=atom";
 
     @Bean
     @InboundChannelAdapter("myFeedChannel")
-    FeedEntryMessageSource feedEntrySource() throws MalformedURLException {
-        FeedEntryMessageSource source = new FeedEntryMessageSource(new URL(url), "myKey");
-        return source;
+    FeedEntryMessageSource myFeedEntrySource() throws MalformedURLException {
+        return new FeedEntryMessageSource(new URL(url), "myKey");
     }
 
     @Bean
@@ -39,15 +50,15 @@ public class EdgarFeedAdapter {
     @Bean
     public MetadataStore metadataStore() {
         PropertiesPersistingMetadataStore metadataStore = new PropertiesPersistingMetadataStore();
+        // delete target/classes/metadata-store.properties there fore delete cache if want output
         metadataStore.setBaseDirectory("target/classes");
         return metadataStore;
     }
 
     @Bean(name = PollerMetadata.DEFAULT_POLLER)
     public PollerMetadata defaultPoller() {
-
         PollerMetadata pollerMetadata = new PollerMetadata();
-        pollerMetadata.setTrigger(new PeriodicTrigger(10 * 1000));
+        pollerMetadata.setTrigger(new PeriodicTrigger(60 * 1000)); // every 60 s
         return pollerMetadata;
     }
 
@@ -56,10 +67,9 @@ public class EdgarFeedAdapter {
         return new AbstractPayloadTransformer<SyndEntry, NewsItem>() {
             @Override
             protected NewsItem transformPayload(SyndEntry payload) {
-                SyndEntry entry = payload;
-                String epoch = entry.getPublishedDate() != null ? String.valueOf(entry.getPublishedDate().toInstant().toEpochMilli()) : "";
-                String description = entry.getDescription() != null ? entry.getDescription().getValue() : "";
-                String title = entry.getTitle();
+                String epoch = payload.getPublishedDate() != null ? String.valueOf(payload.getPublishedDate().toInstant().toEpochMilli()) : "";
+                String description = payload.getDescription() != null ? payload.getDescription().getValue() : "";
+                String title = payload.getTitle();
 
                 return new NewsItem(title, description, epoch);
             }
@@ -68,14 +78,11 @@ public class EdgarFeedAdapter {
     }
 
     @Bean
-    public IntegrationFlow feedFlow() throws MalformedURLException {
+    public IntegrationFlow myFeedFlow() {
         return IntegrationFlows
                 .from("myFeedChannel")
                 .transform(transformToNewsItem())
-                .handle(message -> System.out.println("At " + new Date(message.getHeaders().getTimestamp()).toString() + " received " + (NewsItem) message.getPayload()))
-//                .channel( c -> {
-//                    return c.queue("entries");
-//                })
+                .handle(message -> System.out.println("At " + new Date(message.getHeaders().getTimestamp()) + " received " + message.getPayload()))
                 .get();
     }
 }
