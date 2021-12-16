@@ -28,7 +28,7 @@ public class EdgarRssAppApplication {
         SpringApplication.run(EdgarRssAppApplication.class, args);
     }
 
-    String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";  // delete metadata-store.properties if no output
+    String url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&CIK=&type=&company=&dateb=&owner=include&start=0&count=40&output=atom";  // delete metadata-store.properties if no output
 
     @Bean
     @InboundChannelAdapter("myFeedChannel")
