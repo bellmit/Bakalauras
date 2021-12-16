@@ -31,6 +31,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
+// Todo poll from multiple URLs
+// https://stackoverflow.com/questions/36258791/how-to-dynamically-register-feed-inbound-adapter-in-spring-integration
+
 @Configuration
 @EnableIntegration
 public class EdgarFeedAdapter {
@@ -45,6 +48,7 @@ public class EdgarFeedAdapter {
     @Bean
     public DirectChannel myFeedChannel() {
         return new DirectChannel();
+//        return MessageChannels.direct().wireTap("outChannel").get();
     }
 
     @Bean
