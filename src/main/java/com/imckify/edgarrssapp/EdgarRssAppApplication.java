@@ -41,12 +41,7 @@ public class EdgarRssAppApplication {
         SpringApplication.run(EdgarRssAppApplication.class, args);
     }
 
-//        String userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36";
-//    String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";  // Todo keiciant linkus veikia
-    String url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&amp;CIK=&amp;type=&amp;company=&amp;dateb=&amp;owner=include&amp;start=0&amp;count=10&amp;output=atom";
-
-//    @Value("https://www.sec.gov/Archives/edgar/xbrlrss.all.xmls")
-//    private Resource resource;
+    String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";  // delete metadata-store.properties if no output
 
     @Bean
     @InboundChannelAdapter("feedChannel")
@@ -73,7 +68,7 @@ public class EdgarRssAppApplication {
     @Bean
     public MetadataStore metadataStore() {
         PropertiesPersistingMetadataStore metadataStore = new PropertiesPersistingMetadataStore();
-        metadataStore.setBaseDirectory("temp/metadataStore");
+        metadataStore.setBaseDirectory("target/classes");
         return metadataStore;
     }
 
@@ -82,7 +77,13 @@ public class EdgarRssAppApplication {
         return IntegrationFlows
                 .from(Feed.inboundAdapter(new URL(url), "myKey").metadataStore(metadataStore()),
                         e -> e.poller(p -> p.fixedRate(10000)))
-                .channel(c -> c.queue("entries"))
+                .handle(message -> {
+                    SyndEntry entry = (SyndEntry) message.getPayload();
+                    String epoch = entry.getPublishedDate() != null ? String.valueOf(entry.getPublishedDate().toInstant().toEpochMilli()) : "";
+                    String description = entry.getDescription() != null ? entry.getDescription().getValue() : "";
+                    String title = entry.getTitle();
+                    System.out.println(title);
+                }) // or .channel(c -> c.queue("entries"))
                 .get();
     }
 
