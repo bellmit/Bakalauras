@@ -80,7 +80,7 @@ public class EdgarRssAppApplication {
     @Bean
     public IntegrationFlow feedFlow() throws MalformedURLException {
         return IntegrationFlows
-                .from(Feed.inboundAdapter(new URL(url), "myKey"),
+                .from(Feed.inboundAdapter(new URL(url), "myKey").metadataStore(metadataStore()),
                         e -> e.poller(p -> p.fixedRate(10000)))
                 .channel(c -> c.queue("entries"))
                 .get();
