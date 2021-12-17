@@ -31,13 +31,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
-// Todo poll from multiple URLs
-// https://stackoverflow.com/questions/36258791/how-to-dynamically-register-feed-inbound-adapter-in-spring-integration
-
 @Configuration
 @EnableIntegration
 public class EdgarFeedAdapter {
-    String url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&count=10&output=atom";
+    String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";
 
     @Bean
     @InboundChannelAdapter("myFeedChannel")
@@ -48,7 +45,6 @@ public class EdgarFeedAdapter {
     @Bean
     public DirectChannel myFeedChannel() {
         return new DirectChannel();
-//        return MessageChannels.direct().wireTap("outChannel").get();
     }
 
     @Bean
@@ -62,7 +58,7 @@ public class EdgarFeedAdapter {
     @Bean(name = PollerMetadata.DEFAULT_POLLER)
     public PollerMetadata defaultPoller() {
         PollerMetadata pollerMetadata = new PollerMetadata();
-        pollerMetadata.setTrigger(new PeriodicTrigger(60 * 1000)); // every 60 s
+        pollerMetadata.setTrigger(new PeriodicTrigger(60 * 1000)); // every 60 s. overrides default period
         return pollerMetadata;
     }
 
@@ -70,12 +66,24 @@ public class EdgarFeedAdapter {
     public AbstractPayloadTransformer<SyndEntry, NewsItem> transformToNewsItem() {
         return new AbstractPayloadTransformer<SyndEntry, NewsItem>() {
             @Override
-            protected NewsItem transformPayload(SyndEntry payload) {
-                String epoch = payload.getPublishedDate() != null ? String.valueOf(payload.getPublishedDate().toInstant().toEpochMilli()) : "";
-                String description = payload.getDescription() != null ? payload.getDescription().getValue() : "";
-                String title = payload.getTitle();
+            protected NewsItem transformPayload(SyndEntry entry) {
+                String epoch = "";
+                String description = "";
+                String title = "";
 
-                return new NewsItem(title, description, epoch);
+                if (entry.getPublishedDate() != null && entry.getDescription() != null) {           // rss_2.0 format
+                    epoch = String.valueOf(entry.getPublishedDate().toInstant().toEpochMilli());
+                    description = entry.getDescription().getValue();
+                    title = entry.getTitle();
+                } else if (entry.getUpdatedDate() != null && entry.getCategories().size() != 0) {   // atom_1.0 format
+                    epoch = String.valueOf(entry.getUpdatedDate().toInstant().toEpochMilli());
+                    description = entry.getCategories().get(0).getName();
+                    title = entry.getTitle().replace(description + " - ", "");
+                }
+
+                String dateReadable = epoch != "" ? new Date(Long.parseLong(epoch)).toString() : "";
+
+                return new NewsItem(title, description, dateReadable);
             }
         };
 
@@ -86,7 +94,11 @@ public class EdgarFeedAdapter {
         return IntegrationFlows
                 .from("myFeedChannel")
                 .transform(transformToNewsItem())
-                .handle(message -> System.out.println("At " + new Date(message.getHeaders().getTimestamp()) + " received " + message.getPayload()))
+                .handle(message -> {
+                    Long timestamp = message.getHeaders().getTimestamp();
+                    String dateStr = timestamp != null ? (new Date(timestamp)).toString() : "";
+                    System.out.println("At " + dateStr + " received " + message.getPayload());
+                })
                 .get();
     }
 }
