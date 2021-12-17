@@ -56,6 +56,6 @@ public class NewsItem {
 
     @Override
     public String toString() {
-        return getTitle() + ',' + getDescription() + ',' + getDate();
+        return getDate() + ',' + getTitle() + ',' + getDescription();
     }
 }

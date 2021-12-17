@@ -13,38 +13,42 @@ package com.imckify.edgarrssapp;
  */
 
 import com.rometools.rome.feed.synd.SyndEntry;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.InboundChannelAdapter;
-import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.config.EnableIntegration;
-import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.*;
 import org.springframework.integration.feed.inbound.FeedEntryMessageSource;
+import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.metadata.MetadataStore;
 import org.springframework.integration.metadata.PropertiesPersistingMetadataStore;
 import org.springframework.integration.scheduling.PollerMetadata;
 import org.springframework.integration.transformer.AbstractPayloadTransformer;
-import org.springframework.scheduling.support.PeriodicTrigger;
+import org.springframework.scheduling.support.CronTrigger;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.TimeZone;
 
 @Configuration
 @EnableIntegration
 public class EdgarFeedAdapter {
-    String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";
+
+    @Value("https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&CIK=&type=&company=&dateb=&owner=include&start=0&count=40&output=atom")
+    private URL feedUrl;
 
     @Bean
-    @InboundChannelAdapter("myFeedChannel")
-    FeedEntryMessageSource myFeedEntrySource() throws MalformedURLException {
-        return new FeedEntryMessageSource(new URL(url), "myKey");
+    @InboundChannelAdapter("myFeedChannel") // puts message of each SyndEntry to myFeedChannel
+    FeedEntryMessageSource myFeedEntrySource() {
+        return new FeedEntryMessageSource(this.feedUrl, "myKey");
     }
 
     @Bean
-    public DirectChannel myFeedChannel() {
-        return new DirectChannel();
+    public DirectChannelSpec myFeedChannel() {  // hold messages from myFeedEntrySource
+        return MessageChannels
+                .direct()
+                .wireTap("loggingFlow.input");
     }
 
     @Bean
@@ -58,7 +62,9 @@ public class EdgarFeedAdapter {
     @Bean(name = PollerMetadata.DEFAULT_POLLER)
     public PollerMetadata defaultPoller() {
         PollerMetadata pollerMetadata = new PollerMetadata();
-        pollerMetadata.setTrigger(new PeriodicTrigger(60 * 1000)); // every 60 s. overrides default period
+        String cron = "* * 6-22 ? * MON-FRI";   // Todo "0 0/10 6-22 ? * MON-FRI"
+        pollerMetadata.setTrigger(new CronTrigger(cron, TimeZone.getTimeZone("EST")));
+//        pollerMetadata.setTrigger(new PeriodicTrigger(60 * 1000));
         return pollerMetadata;
     }
 
@@ -90,15 +96,16 @@ public class EdgarFeedAdapter {
     }
 
     @Bean
+    public IntegrationFlow loggingFlow() {
+        return f -> f.log(LoggingHandler.Level.WARN, m -> transformToNewsItem().doTransform(m)); // return f -> f.log();
+    }
+
+    @Bean
     public IntegrationFlow myFeedFlow() {
         return IntegrationFlows
                 .from("myFeedChannel")
                 .transform(transformToNewsItem())
-                .handle(message -> {
-                    Long timestamp = message.getHeaders().getTimestamp();
-                    String dateStr = timestamp != null ? (new Date(timestamp)).toString() : "";
-                    System.out.println("At " + dateStr + " received " + message.getPayload());
-                })
+                .handle(m -> {})    // Todo simulate database operation or print
                 .get();
     }
 }
