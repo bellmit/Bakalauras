@@ -10,6 +10,7 @@ import org.springframework.integration.annotation.Poller;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.feed.inbound.FeedEntryMessageSource;
 import org.springframework.integration.transformer.AbstractPayloadTransformer;
 
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ public class AdapterConfig {
     @InboundChannelAdapter(value = "newsInput", poller = @Poller(fixedRate = "5000", maxMessagesPerPoll = "1"))
     public Fetcher newsFetcher() {
         List<String> urls = Arrays.asList(
+//                "https://spring.io/blog.atom",
+//                "http://feeds.foxnews.com/foxnews/video?format=xml"
                 "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml",
                 "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&count=40&output=atom"
         );

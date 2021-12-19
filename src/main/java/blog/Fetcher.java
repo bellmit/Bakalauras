@@ -40,6 +40,8 @@ public class Fetcher implements MessageSource, InitializingBean {
         try {
             for (String url : urls) {
                 feeds.add(feedFetcher.retrieveFeed(userAgent, new URL(url)));
+                // traced rome HttpURLFeedFetcher.retrieveFeed(). Edgar atoms do not support Conditional GET and
+                // always send 200, hence fetcher does not cache. Todo extend HttpURLFeedFetcher.retrieveFeed()
             }
         } catch (IOException e) {
             logger.error("IO Problem while retrieving feed", e);
