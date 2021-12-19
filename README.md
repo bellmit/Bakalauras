@@ -1,3 +1,5 @@
 # EdgarRssReader
-Cloned from BikashShaw/MultipleRSSFeedRead. 
-Spring Integration in XML with deprecated rome-fetcher: Reading multiple feeds. Does not cache atom feeds.
+Spring Integration with deprecated rome-fetcher: Reading multiple feeds.  
+
+Cloned from BikashShaw/MultipleRSSFeedRead.  
+Migrated from XML to DSL configuration.
