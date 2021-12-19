@@ -75,15 +75,16 @@ public class EdgarFeedAdapter {
 
     }
 
+    // Todo debug this and previous commit with same cron
     @Bean
     public IntegrationFlow myFeedFlow() {
         return IntegrationFlows
                 .from(Feed.inboundAdapter(feedUrl, "myKey"),
                         e -> e.poller(p -> p.trigger(new CronTrigger("0/5 * * ? * *", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(300))
                 )
-                .channel("myFeedChannel")
                 .transform(transformToNewsItem())
-                .log(LoggingHandler.Level.WARN, m -> m)
+                .channel("myFeedChannel")
+                .log(LoggingHandler.Level.WARN, m -> m.getPayload())
                 .get();
     }
 }
