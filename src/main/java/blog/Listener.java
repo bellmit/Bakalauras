@@ -1,12 +1,12 @@
-package blog.helper;
+package blog;
 
 import com.rometools.fetcher.FetcherEvent;
 import com.rometools.fetcher.FetcherListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FetcherEventListenerImpl implements FetcherListener {
-    private static Logger logger = LoggerFactory.getLogger(FetcherEventListenerImpl.class);
+public class Listener implements FetcherListener {
+    private static Logger logger = LoggerFactory.getLogger(Listener.class);
 
     public void fetcherEvent(FetcherEvent event) {
         String eventType = event.getEventType();

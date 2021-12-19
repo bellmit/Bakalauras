@@ -20,8 +20,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewsReader implements MessageSource, InitializingBean {
-    private static Logger logger = LoggerFactory.getLogger(NewsReader.class);
+public class Reader implements MessageSource, InitializingBean {
+    private static Logger logger = LoggerFactory.getLogger(Reader.class);
     private FeedFetcherCache feedInfoCache;
     private FeedFetcher feedFetcher;
     private FetcherListener fetcherListener;

@@ -1,11 +1,11 @@
 package blog;
 
-public class NewsItem {
+public class Item {
     private String title;
     private String description;
     private String date;
 
-    public NewsItem(String title, String description, String date) {
+    public Item(String title, String description, String date) {
 
         this.title = title;
         this.description = description;
@@ -37,9 +37,9 @@ public class NewsItem {
             return true;
         }
 
-        NewsItem n = (NewsItem) o;
+        Item n = (Item) o;
         // instanceof Check and actual value check
-        return o instanceof NewsItem &&
+        return o instanceof Item &&
                 n.getTitle().equals(getTitle()) &&
                 n.getDescription().equals(getDescription()) &&
                 n.getDate().equals(getDate());
