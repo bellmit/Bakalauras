@@ -24,15 +24,15 @@ public class AdapterConfig {
 
     @Bean
     @InboundChannelAdapter(value = "newsInput", poller = @Poller(fixedRate = "5000", maxMessagesPerPoll = "1"))
-    public Reader newsReader() {
+    public Fetcher newsFetcher() {
         List<String> urls = Arrays.asList(
                 "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml",
                 "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&count=40&output=atom"
         );
-        Reader reader = new Reader();
-        reader.setUrls(urls);
-        reader.setFetcherListener(new Listener());
-        return reader;
+        Fetcher fetcher = new Fetcher();
+        fetcher.setUrls(urls);
+        fetcher.setFetcherListener(new Listener());
+        return fetcher;
     }
 
     @Bean
