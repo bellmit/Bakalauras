@@ -33,6 +33,8 @@ import org.springframework.scheduling.support.CronTrigger;
 import java.net.URL;
 import java.util.Date;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Configuration
 @EnableIntegration
@@ -53,9 +55,13 @@ public class EdgarFeedAdapter {
         return new AbstractPayloadTransformer<SyndEntry, NewsItem>() {
             @Override
             protected NewsItem transformPayload(SyndEntry entry) {
-                String epoch = "";
+                String epoch = ""; // for Long.compare()
                 String description = "";
                 String title = "";
+
+                String link = "";
+                String cik = "";
+                String acc = "";
 
                 if (entry.getPublishedDate() != null && entry.getDescription() != null) {           // rss_2.0 format
                     epoch = String.valueOf(entry.getPublishedDate().toInstant().toEpochMilli());
@@ -67,9 +73,19 @@ public class EdgarFeedAdapter {
                     title = entry.getTitle().replace(description + " - ", "");
                 }
 
+                link = entry.getLink();
+                Matcher matcherCik = Pattern.compile("(?:\\d{10})", Pattern.MULTILINE).matcher(title);
+                if (matcherCik.find()) {
+                    cik = matcherCik.group();
+                }
+                Matcher matcherAcc = Pattern.compile("(?:\\d{10}-\\d+-\\d+)", Pattern.MULTILINE).matcher(link);
+                if (matcherAcc.find()) {
+                    acc = matcherAcc.group();
+                }
+
                 String dateReadable = epoch != "" ? new Date(Long.parseLong(epoch)).toString() : "";
 
-                return new NewsItem(title, description, dateReadable);
+                return new NewsItem(title, description, dateReadable); // Filing
             }
         };
 
