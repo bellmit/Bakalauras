@@ -39,7 +39,7 @@ public class Fetcher implements MessageSource, InitializingBean {
         List<SyndFeed> feeds = new ArrayList<>();
         try {
             for (String url : urls) {
-                feeds.add(feedFetcher.retrieveFeed(userAgent, new URL(url)));
+                feeds.add(feedFetcher.retrieveFeed(userAgent, new URL(url))); // Todo do not send cached
                 // traced rome HttpURLFeedFetcher.retrieveFeed(). Edgar atoms do not support Conditional GET and
                 // always send 200, hence fetcher does not cache. Todo extend HttpURLFeedFetcher.retrieveFeed()
             }

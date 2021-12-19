@@ -29,8 +29,8 @@ public class AdapterConfig {
         List<String> urls = Arrays.asList(
 //                "https://spring.io/blog.atom",
 //                "http://feeds.foxnews.com/foxnews/video?format=xml"
-                "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml",
-                "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&count=40&output=atom"
+                "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml"//,
+//                "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&count=40&output=atom"
         );
         Fetcher fetcher = new Fetcher();
         fetcher.setUrls(urls);
