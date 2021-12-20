@@ -1,4 +1,4 @@
-package com.imckify.bakis.adapter;
+package com.imckify.bakis.feedadapter;
 
 public class NewsItem {
     private String title;

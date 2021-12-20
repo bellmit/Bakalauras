@@ -1,15 +1,12 @@
 package com.imckify.bakis.controllers;
 
-import com.imckify.bakis.services.FeedReaderService;
 import com.imckify.bakis.exceptions.ResourceNotFoundException;
 import com.imckify.bakis.models.Notifications;
 import com.imckify.bakis.repos.NotificationsRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,25 +19,7 @@ public class NotificationsControl {
     @Autowired
     private NotificationsRepo NotificationsRepo;
 
-    @Autowired
-    FeedReaderService FeedReaderService;
-
-    @Autowired
-    CacheManager cacheManager; // @EnableCaching init cacheManager by default
-
     public static final Logger logger = LoggerFactory.getLogger(NotificationsControl.class);
-
-    @Scheduled(fixedRate = 1000 * 5)
-    private void pollPeriodically() throws Exception {
-        logger.info("Executing scheduled task {}()", new Object(){}.getClass().getEnclosingMethod().getName());
-        List<Notifications> news = FeedReaderService.pollFeed();
-//        org.springframework.cache.Cache cache = this.cacheManager.getCache("feed"); // debug spring cache
-
-        for (int i = 0; i < 5; i++) {
-            System.out.println(news.get(i));
-        }
-        System.out.println("==============================================");
-    }
 
     @GetMapping("")
     public ResponseEntity<List<Notifications>> getNotifications() {

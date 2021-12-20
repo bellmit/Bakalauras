@@ -1,4 +1,4 @@
-package com.imckify.bakis.adapter;
+package com.imckify.bakis.feedadapter;
 
 /*
  * Copyright 2021 the original author or authors.
@@ -69,6 +69,12 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
         Assert.notNull(metadataKey, "'metadataKeyPrefix' must not be null");
         this.feedUrls = feedUrls;
         this.metadataKeyPrefix = metadataKey + ".";
+    }
+
+    public MultiFeedEntryMessageSource setMetadataStore(MetadataStore metadataStore) {
+        Assert.notNull(metadataStore, "'metadataStore' must not be null");
+        this.metadataStore = metadataStore;
+        return this;
     }
 
     /**

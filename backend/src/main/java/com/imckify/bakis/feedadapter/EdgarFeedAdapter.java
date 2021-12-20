@@ -1,4 +1,4 @@
-package com.imckify.bakis.adapter;
+package com.imckify.bakis.feedadapter;
 
 /**
  * EdgarFeedAdapter class is an automatic scheduled background feed poller (otherwise known as adapter) of Edgar
@@ -49,7 +49,8 @@ public class EdgarFeedAdapter {
     @Bean
     public MetadataStore metadataStore() {
         PropertiesPersistingMetadataStore metadataStore = new PropertiesPersistingMetadataStore();
-        metadataStore.setBaseDirectory("target/temp");
+        String path = this.getClass().getClassLoader().getResource("application.properties/..").getPath();
+        metadataStore.setBaseDirectory(path + "temp");
         return metadataStore;
     }
 
@@ -97,7 +98,7 @@ public class EdgarFeedAdapter {
     @Bean
     public IntegrationFlow myFeedFlow() {
         return IntegrationFlows
-                .from(new MultiFeedEntryMessageSource(new ArrayList<URL>() {{ add(feedUrl); add(rssUrl); }}, "myKey").preserveWireFeed(true),
+                .from(new MultiFeedEntryMessageSource(new ArrayList<URL>() {{ add(feedUrl); add(rssUrl); }}, "myKey").setMetadataStore(metadataStore()).preserveWireFeed(true),
                         e -> e.poller(p -> p.trigger(new CronTrigger("0/5 * * ? * *", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(300))
                 )
                 .transform(transformToNewsItem())
