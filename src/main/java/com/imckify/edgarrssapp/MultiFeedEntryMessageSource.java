@@ -170,7 +170,7 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
                 }
             }
         }
-        // sorting mixed feeds' entries
+        // mixing looped feed entry blocks, so entries are ungrouped
         newEntries = newEntries.stream().sorted((e1, e2) -> new SyndEntryPublishedDateComparator().compare(e1.getValue(), e2.getValue())).collect(Collectors.toList());
         this.entries.addAll(newEntries); // must me sorted in ascending order, so each poll from FIFO queue will increase this.lastTimes
     }
