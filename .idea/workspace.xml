@@ -4,14 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ee72776b-d7b6-4ac4-8ee8-f42d4f48ab70" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jarRepositories.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/backend.iml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/backend.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/pom.xml" afterDir="false" />
-    </list>
+    <list default="true" id="ee72776b-d7b6-4ac4-8ee8-f42d4f48ab70" name="Default Changelist" comment="" />
     <list id="6b4065e4-6eff-4f2d-89f9-789e88334f22" name="ignore" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -180,7 +173,7 @@
       <workItem from="1632413166871" duration="12447000" />
       <workItem from="1632480665967" duration="8252000" />
       <workItem from="1632577519636" duration="5883000" />
-      <workItem from="1640018457867" duration="349000" />
+      <workItem from="1640018457867" duration="836000" />
     </task>
     <task id="LOCAL-00001" summary="removing frontend and prisijungimas dirs">
       <created>1621036501107</created>
@@ -399,7 +392,14 @@
       <option name="project" value="LOCAL" />
       <updated>1632583385690</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary=".idea">
+      <created>1640018827705</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1640018827705</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -445,7 +445,6 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="removing frontend and prisijungimas dirs" />
     <MESSAGE value="add Scraper submodule" />
-    <MESSAGE value=".idea" />
     <MESSAGE value="if main ToC not found, search for Item 8 Toc and try to cot Notes out" />
     <MESSAGE value="scrape Nasdaq 100 index (NDX) with MCap weights, save ticker, cik pairs to ndx.json" />
     <MESSAGE value="fixed regex patterns for notes and index string searches" />
@@ -465,7 +464,8 @@
     <MESSAGE value="tickers ordered by MCap from ndx" />
     <MESSAGE value="minor" />
     <MESSAGE value="tqdm" />
-    <option name="LAST_COMMIT_MESSAGE" value="tqdm" />
+    <MESSAGE value=".idea" />
+    <option name="LAST_COMMIT_MESSAGE" value=".idea" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
