@@ -90,11 +90,10 @@ public class EdgarFeedAdapter {
 
     }
 
-    // Todo debug this and previous commit with same cron
     @Bean
     public IntegrationFlow myFeedFlow() {
         return IntegrationFlows
-                .from(new FeedEntryMessageSource(feedUrl, "myKey"),
+                .from(new MultiFeedEntryMessageSource(feedUrl, "myKey"),
                         e -> e.poller(p -> p.trigger(new CronTrigger("0/5 * * ? * *", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(300))
                 )
                 .transform(transformToNewsItem())

@@ -54,7 +54,7 @@ import com.rometools.rome.io.XmlReader;
  *
  * @since 2.0
  */
-public class FeedEntryMessageSource extends AbstractMessageSource<SyndEntry> {
+public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry> {
 
     private final URL feedUrl;
 
@@ -82,13 +82,13 @@ public class FeedEntryMessageSource extends AbstractMessageSource<SyndEntry> {
 
 
     /**
-     * Creates a FeedEntryMessageSource that will use a HttpURLFeedFetcher to read feeds from the given URL.
+     * Creates a MultiFeedEntryMessageSource that will use a HttpURLFeedFetcher to read feeds from the given URL.
      * If the feed URL has a protocol other than http*, consider providing a custom implementation of the
      * {@link Resource} via the alternate constructor.
      * @param feedUrl The URL.
      * @param metadataKey The metadata key.
      */
-    public FeedEntryMessageSource(URL feedUrl, String metadataKey) {
+    public MultiFeedEntryMessageSource(URL feedUrl, String metadataKey) {
         Assert.notNull(feedUrl, "'feedUrl' must not be null");
         Assert.notNull(metadataKey, "'metadataKey' must not be null");
         this.feedUrl = feedUrl;
@@ -97,12 +97,12 @@ public class FeedEntryMessageSource extends AbstractMessageSource<SyndEntry> {
     }
 
     /**
-     * Creates a FeedEntryMessageSource that will read feeds from the given {@link Resource}.
+     * Creates a MultiFeedEntryMessageSource that will read feeds from the given {@link Resource}.
      * @param feedResource the {@link Resource} to use.
      * @param metadataKey the metadata key.
      * @since 5.0
      */
-    public FeedEntryMessageSource(Resource feedResource, String metadataKey) {
+    public MultiFeedEntryMessageSource(Resource feedResource, String metadataKey) {
         Assert.notNull(feedResource, "'feedResource' must not be null");
         Assert.notNull(metadataKey, "'metadataKey' must not be null");
         this.feedResource = feedResource;
@@ -237,7 +237,7 @@ public class FeedEntryMessageSource extends AbstractMessageSource<SyndEntry> {
 
     @Override
     public String toString() {
-        return "FeedEntryMessageSource{" +
+        return "MultiFeedEntryMessageSource{" +
                 "feedUrl=" + this.feedUrl +
                 ", feedResource=" + this.feedResource +
                 ", metadataKey='" + this.metadataKey + '\'' +
