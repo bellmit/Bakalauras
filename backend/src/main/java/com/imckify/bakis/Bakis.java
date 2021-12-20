@@ -16,7 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class Bakis {
 
 	public static void main(String[] args) {
-//		System.out.println("hibernate version " + org.hibernate.Version.getVersionString());
 		SpringApplication.run(Bakis.class, args);
 	}
 
