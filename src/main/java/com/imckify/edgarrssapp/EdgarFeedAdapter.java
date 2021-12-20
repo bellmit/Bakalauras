@@ -23,7 +23,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.*;
-import org.springframework.integration.feed.dsl.Feed;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.metadata.MetadataStore;
 import org.springframework.integration.metadata.PropertiesPersistingMetadataStore;
@@ -95,7 +94,7 @@ public class EdgarFeedAdapter {
     @Bean
     public IntegrationFlow myFeedFlow() {
         return IntegrationFlows
-                .from(Feed.inboundAdapter(feedUrl, "myKey"),
+                .from(new FeedEntryMessageSource(feedUrl, "myKey"),
                         e -> e.poller(p -> p.trigger(new CronTrigger("0/5 * * ? * *", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(300))
                 )
                 .transform(transformToNewsItem())
