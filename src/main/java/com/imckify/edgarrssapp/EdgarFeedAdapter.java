@@ -49,7 +49,7 @@ public class EdgarFeedAdapter {
     @Bean
     public MetadataStore metadataStore() {
         PropertiesPersistingMetadataStore metadataStore = new PropertiesPersistingMetadataStore();
-        metadataStore.setBaseDirectory("target/classes");
+        metadataStore.setBaseDirectory("target/temp");
         return metadataStore;
     }
 
