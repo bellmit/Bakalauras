@@ -1,6 +1,10 @@
 [submodule "GUI"]
 	path = GUI
 	url = https://github.com/iMckify/GUI
+	branch = origin/master
+	update = merge
 [submodule "Scraper"]
 	path = Scraper
 	url = https://github.com/iMckify/Scraper
+	branch = origin/master
+	update = merge
