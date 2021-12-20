@@ -19,14 +19,9 @@ package com.imckify.edgarrssapp;
 import java.io.Reader;
 import java.io.Serializable;
 import java.net.URL;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Queue;
-import java.util.AbstractMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.integration.context.IntegrationContextUtils;
@@ -55,7 +50,6 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
     private final List<URL> feedUrls;
     private final String metadataKeyPrefix;
     private final Queue<AbstractMap.SimpleEntry<URL, SyndEntry>> entries = new ConcurrentLinkedQueue<>();
-    private final Comparator<SyndEntry> syndEntryComparator = new MultiFeedEntryMessageSource.SyndEntryPublishedDateComparator();
     private final Object monitor = new Object();
     private final Object feedMonitor = new Object();
     private MetadataStore metadataStore;
@@ -143,7 +137,7 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
         URL url = pairUrlSyndEntry.getKey();
         SyndEntry next = pairUrlSyndEntry.getValue();
 
-        Date lastModifiedDate = MultiFeedEntryMessageSource.getLastModifiedDate(next);
+        Date lastModifiedDate = getLastModifiedDate(next);
         if (lastModifiedDate != null) {
             this.lastTimes.put(url, lastModifiedDate.getTime());
         } else {
@@ -155,28 +149,30 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
 
     private void populateEntryList() {
         Map<URL, SyndFeed> syndFeeds = this.getFeeds();
+        List<AbstractMap.SimpleEntry<URL,SyndEntry>> newEntries = new ArrayList<>();
         for (URL url : syndFeeds.keySet()) {
             SyndFeed syndFeed = syndFeeds.get(url);
             if (syndFeed != null) {
                 List<SyndEntry> retrievedEntries = syndFeed.getEntries();
                 if (!CollectionUtils.isEmpty(retrievedEntries)) {
                     boolean withinNewEntries = false;
-                    retrievedEntries.sort(this.syndEntryComparator);
-                    // todo list mixed
+                    retrievedEntries.sort(new SyndEntryPublishedDateComparator()); // ascending dates
                     for (SyndEntry entry : retrievedEntries) {
                         Date entryDate = getLastModifiedDate(entry);
                         long lastTime = this.lastTimes.get(url);
-                        if ((entryDate != null && entryDate.getTime() > lastTime)
-                                || (entryDate == null && withinNewEntries)) {
+                        if ((entryDate != null && entryDate.getTime() > lastTime) // only latest
+                                || (entryDate == null && withinNewEntries)) {   // date null and any before was latest
                             AbstractMap.SimpleEntry<URL,SyndEntry> simpleEntry = new AbstractMap.SimpleEntry<>(url, entry);
-                            this.entries.add(simpleEntry); // todo add to list mixed
+                            newEntries.add(simpleEntry);
                             withinNewEntries = true;
                         }
                     }
-                    // todo this.entries.addAll(list)
                 }
             }
         }
+        // sorting mixed feeds' entries
+        newEntries = newEntries.stream().sorted((e1, e2) -> new SyndEntryPublishedDateComparator().compare(e1.getValue(), e2.getValue())).collect(Collectors.toList());
+        this.entries.addAll(newEntries); // must me sorted in ascending order, so each poll from FIFO queue will increase this.lastTimes
     }
 
     private Map<URL, SyndFeed> getFeeds() {
