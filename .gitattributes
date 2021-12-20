@@ -1,7 +1,4 @@
-*.java linguist-detectable=true
-*.py linguist-detectable=true
-*.html linguist-detectable=true
-*.js linguist-detectable=true
-
-
+*.py linguist-language=Python
+*.java linguist-language=Java
+*.js linguist-language=JavaScript
 
