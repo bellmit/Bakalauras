@@ -1,7 +1,7 @@
 package com.imckify.edgarrssapp;
 
 /*
- * Copyright 2002-2020 the original author or authors.
+ * Copyright 2021 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Queue;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.core.io.Resource;
 import org.springframework.integration.context.IntegrationContextUtils;
 import org.springframework.integration.endpoint.AbstractMessageSource;
 import org.springframework.integration.metadata.MetadataStore;
@@ -43,105 +45,51 @@ import com.rometools.rome.io.XmlReader;
 
 /**
  * This implementation of {@link org.springframework.integration.core.MessageSource} will
- * produce individual {@link SyndEntry}s for a feed identified with the 'feedUrl'
+ * produce individual {@link SyndEntry}s for a multiples feeds identified with the 'feedUrls'
  * attribute.
  *
- * @author Josh Long
- * @author Mario Gray
- * @author Oleg Zhurakousky
- * @author Artem Bilan
- * @author Aaron Loes
- *
- * @since 2.0
+ * @author <a href="https://github.com/iMckify">Rokas Mockevicius</a>
  */
 public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry> {
 
-    private final URL feedUrl;
-
-    private final Resource feedResource;
-
-    private final String metadataKey;
-
-    private final Queue<SyndEntry> entries = new ConcurrentLinkedQueue<>();
-
+    private final List<URL> feedUrls;
+    private final String metadataKeyPrefix;
+    private final Queue<AbstractMap.SimpleEntry<URL, SyndEntry>> entries = new ConcurrentLinkedQueue<>();
+    private final Comparator<SyndEntry> syndEntryComparator = new MultiFeedEntryMessageSource.SyndEntryPublishedDateComparator();
     private final Object monitor = new Object();
-
-    private final Comparator<SyndEntry> syndEntryComparator = new SyndEntryPublishedDateComparator();
-
     private final Object feedMonitor = new Object();
-
-    private SyndFeedInput syndFeedInput = new SyndFeedInput();
-
-    private boolean syndFeedInputSet;
-
     private MetadataStore metadataStore;
-
-    private volatile long lastTime = -1;
-
+    private final Map<URL, Long> lastTimes = new HashMap<>();
     private volatile boolean initialized;
-
+    private boolean preserveWireFeed = false;
 
     /**
-     * Creates a MultiFeedEntryMessageSource that will use a HttpURLFeedFetcher to read feeds from the given URL.
+     * Creates a MultiFeedEntryMessageSource that will use a HttpURLFeedFetcher to read feeds from the given URLs.
      * If the feed URL has a protocol other than http*, consider providing a custom implementation of the
-     * {@link Resource} via the alternate constructor.
-     * @param feedUrl The URL.
+     * org.springframework.core.io.Resource via the alternate constructor (Not Implemented yet).
+     * @param feedUrls list of feed URLs.
      * @param metadataKey The metadata key.
      */
-    public MultiFeedEntryMessageSource(URL feedUrl, String metadataKey) {
-        Assert.notNull(feedUrl, "'feedUrl' must not be null");
-        Assert.notNull(metadataKey, "'metadataKey' must not be null");
-        this.feedUrl = feedUrl;
-        this.metadataKey = metadataKey + "." + feedUrl;
-        this.feedResource = null;
-    }
-
-    /**
-     * Creates a MultiFeedEntryMessageSource that will read feeds from the given {@link Resource}.
-     * @param feedResource the {@link Resource} to use.
-     * @param metadataKey the metadata key.
-     * @since 5.0
-     */
-    public MultiFeedEntryMessageSource(Resource feedResource, String metadataKey) {
-        Assert.notNull(feedResource, "'feedResource' must not be null");
-        Assert.notNull(metadataKey, "'metadataKey' must not be null");
-        this.feedResource = feedResource;
-        this.metadataKey = metadataKey;
-        this.feedUrl = null;
-    }
-
-    public void setMetadataStore(MetadataStore metadataStore) {
-        Assert.notNull(metadataStore, "'metadataStore' must not be null");
-        this.metadataStore = metadataStore;
-    }
-
-    /**
-     * Specify a parser for Feed XML documents.
-     * @param syndFeedInput the {@link SyndFeedInput} to use.
-     * @since 5.0
-     */
-    public void setSyndFeedInput(SyndFeedInput syndFeedInput) {
-        Assert.notNull(syndFeedInput, "'syndFeedInput' must not be null");
-        this.syndFeedInput = syndFeedInput;
-        this.syndFeedInputSet = true;
+    public MultiFeedEntryMessageSource(List<URL> feedUrls, String metadataKey) {
+        Assert.notEmpty(feedUrls, "'feedUrls' must not be empty");
+        Assert.notNull(metadataKey, "'metadataKeyPrefix' must not be null");
+        this.feedUrls = feedUrls;
+        this.metadataKeyPrefix = metadataKey + ".";
     }
 
     /**
      * Specify a flag to indication if {@code WireFeed} should be preserved in the target {@link SyndFeed}.
      * @param preserveWireFeed the {@code boolean} flag.
-     * @since 5.0
      * @see SyndFeedInput#setPreserveWireFeed(boolean)
+     * @return this
      */
-    public void setPreserveWireFeed(boolean preserveWireFeed) {
-        Assert.isTrue(!this.syndFeedInputSet,
-                () -> "'preserveWireFeed' must be configured on the provided [" + this.syndFeedInput + "]");
-        this.syndFeedInput.setPreserveWireFeed(preserveWireFeed);
+    public MultiFeedEntryMessageSource preserveWireFeed(boolean preserveWireFeed) {
+        this.preserveWireFeed = preserveWireFeed;
+        return this;
     }
 
     @Override
-    public String getComponentType() {
-        return "feed:inbound-channel-adapter";
-    }
+    public String getComponentType() { return "multiple-feed:inbound-channel-adapter"; }
 
     @Override
     protected void onInit() {
@@ -157,22 +105,29 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
             }
         }
 
-        String lastTimeValue = this.metadataStore.get(this.metadataKey);
-        if (StringUtils.hasText(lastTimeValue)) {
-            this.lastTime = Long.parseLong(lastTimeValue);
+        for (URL url : this.feedUrls) {
+            String metadataKey = this.metadataKeyPrefix + url.toString();
+            String lastTimeValue = this.metadataStore.get(metadataKey);
+
+            if (StringUtils.hasText(lastTimeValue)) {
+                this.lastTimes.put(url, Long.parseLong(lastTimeValue));
+            } else {
+                this.lastTimes.put(url, -1L);
+            }
         }
+
         this.initialized = true;
     }
 
     @Override
-    protected SyndEntry doReceive() {
-        Assert.isTrue(this.initialized,
-                "'FeedEntryReaderMessageSource' must be initialized before it can produce Messages.");
+    protected Object doReceive() {
+        Assert.isTrue(this.initialized, "'MultiFeedEntryMessageSource' must be initialized before it can produce Messages.");
+
         SyndEntry nextEntry;
         synchronized (this.monitor) {
             nextEntry = getNextEntry();
             if (nextEntry == null) {
-                // read feed and try again
+                // read feeds and try again
                 populateEntryList();
                 nextEntry = getNextEntry();
             }
@@ -181,76 +136,77 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
     }
 
     private SyndEntry getNextEntry() {
-        SyndEntry next = this.entries.poll();
-        if (next == null) {
+        AbstractMap.SimpleEntry<URL, SyndEntry> pairUrlSyndEntry = this.entries.poll();
+        if (pairUrlSyndEntry == null || pairUrlSyndEntry.getValue() == null) {
             return null;
         }
+        URL url = pairUrlSyndEntry.getKey();
+        SyndEntry next = pairUrlSyndEntry.getValue();
 
-        Date lastModifiedDate = getLastModifiedDate(next);
+        Date lastModifiedDate = MultiFeedEntryMessageSource.getLastModifiedDate(next);
         if (lastModifiedDate != null) {
-            this.lastTime = lastModifiedDate.getTime();
+            this.lastTimes.put(url, lastModifiedDate.getTime());
+        } else {
+            this.lastTimes.put(url, 1 + this.lastTimes.get(url));
         }
-        else {
-            this.lastTime += 1; //NOSONAR - single poller thread
-        }
-        this.metadataStore.put(this.metadataKey, this.lastTime + "");
+        this.metadataStore.put(this.metadataKeyPrefix + url, this.lastTimes.get(url) + "");
         return next;
     }
 
     private void populateEntryList() {
-        SyndFeed syndFeed = this.getFeed();
-        if (syndFeed != null) {
-            List<SyndEntry> retrievedEntries = syndFeed.getEntries();
-            if (!CollectionUtils.isEmpty(retrievedEntries)) {
-                boolean withinNewEntries = false;
-                retrievedEntries.sort(this.syndEntryComparator);
-                for (SyndEntry entry : retrievedEntries) {
-                    Date entryDate = getLastModifiedDate(entry);
-                    if ((entryDate != null && entryDate.getTime() > this.lastTime)
-                            || (entryDate == null && withinNewEntries)) {
-                        this.entries.add(entry);
-                        withinNewEntries = true;
+        Map<URL, SyndFeed> syndFeeds = this.getFeeds();
+        for (URL url : syndFeeds.keySet()) {
+            SyndFeed syndFeed = syndFeeds.get(url);
+            if (syndFeed != null) {
+                List<SyndEntry> retrievedEntries = syndFeed.getEntries();
+                if (!CollectionUtils.isEmpty(retrievedEntries)) {
+                    boolean withinNewEntries = false;
+                    retrievedEntries.sort(this.syndEntryComparator);
+                    // todo list mixed
+                    for (SyndEntry entry : retrievedEntries) {
+                        Date entryDate = getLastModifiedDate(entry);
+                        long lastTime = this.lastTimes.get(url);
+                        if ((entryDate != null && entryDate.getTime() > lastTime)
+                                || (entryDate == null && withinNewEntries)) {
+                            AbstractMap.SimpleEntry<URL,SyndEntry> simpleEntry = new AbstractMap.SimpleEntry<>(url, entry);
+                            this.entries.add(simpleEntry); // todo add to list mixed
+                            withinNewEntries = true;
+                        }
                     }
+                    // todo this.entries.addAll(list)
                 }
             }
         }
     }
 
-    private SyndFeed getFeed() {
+    private Map<URL, SyndFeed> getFeeds() {
         try {
             synchronized (this.feedMonitor) {
-                Reader reader = this.feedUrl != null
-                        ? new XmlReader(this.feedUrl)
-                        : new XmlReader(this.feedResource.getInputStream());
-                SyndFeed feed = this.syndFeedInput.build(reader);
-                logger.debug(() -> "Retrieved feed for [" + this + "]");
-                if (feed == null) {
-                    logger.debug(() -> "No feeds updated for [" + this + "], returning null");
+                Map<URL, SyndFeed> feeds = new HashMap<>();
+
+                for (URL url : this.feedUrls) {
+                    Reader reader = new XmlReader(url);
+                    SyndFeedInput syndFeedInput = new SyndFeedInput();
+                    syndFeedInput.setPreserveWireFeed(this.preserveWireFeed);
+                    SyndFeed feed = syndFeedInput.build(reader);
+                        logger.debug(() -> this.getClass().getSimpleName() + " Retrieved feed for [" + url + "]");
+                    if (feed == null) {
+                        logger.debug(() -> this.getClass().getSimpleName() + " No feeds updated for [" + url + "], returning null");
+                    }
+                    feeds.put(url, feed);
                 }
-                return feed;
+                return feeds;
             }
         }
         catch (Exception e) {
-            throw new MessagingException("Failed to retrieve feed for '" + this + "'", e);
+            throw new MessagingException("Failed to retrieve feeds for '" + this.getClass().getSimpleName() + "'", e);
         }
-    }
-
-    @Override
-    public String toString() {
-        return "MultiFeedEntryMessageSource{" +
-                "feedUrl=" + this.feedUrl +
-                ", feedResource=" + this.feedResource +
-                ", metadataKey='" + this.metadataKey + '\'' +
-                ", lastTime=" + this.lastTime +
-                '}';
     }
 
     private static Date getLastModifiedDate(SyndEntry entry) {
         return (entry.getUpdatedDate() != null) ? entry.getUpdatedDate() : entry.getPublishedDate();
     }
 
-
-    @SuppressWarnings("serial")
     private static final class SyndEntryPublishedDateComparator implements Comparator<SyndEntry>, Serializable {
 
         SyndEntryPublishedDateComparator() {

@@ -30,6 +30,7 @@ import org.springframework.integration.transformer.AbstractPayloadTransformer;
 import org.springframework.scheduling.support.CronTrigger;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -41,6 +42,9 @@ public class EdgarFeedAdapter {
 
     @Value("https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&CIK=&type=&company=&dateb=&owner=include&start=0&count=40&output=atom")
     private URL feedUrl;
+
+    @Value("https://www.sec.gov/Archives/edgar/xbrlrss.all.xml")
+    private URL rssUrl;
 
     @Bean
     public MetadataStore metadataStore() {
@@ -93,7 +97,7 @@ public class EdgarFeedAdapter {
     @Bean
     public IntegrationFlow myFeedFlow() {
         return IntegrationFlows
-                .from(new MultiFeedEntryMessageSource(feedUrl, "myKey"),
+                .from(new MultiFeedEntryMessageSource(new ArrayList<URL>() {{ add(feedUrl); add(rssUrl); }}, "myKey").preserveWireFeed(true),
                         e -> e.poller(p -> p.trigger(new CronTrigger("0/5 * * ? * *", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(300))
                 )
                 .transform(transformToNewsItem())
