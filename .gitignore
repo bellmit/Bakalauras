@@ -5,5 +5,8 @@
 *.ipr
 
 ### data ###
-data/10K
-data/10K_item8* # matching dirs and files
+data/*
+#### except
+!data/cik
+!data/tickers
+
