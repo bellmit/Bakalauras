@@ -19,6 +19,7 @@ package com.imckify.bakis.feedadapter;
 
 import com.imckify.bakis.models.Filings;
 import com.rometools.rome.feed.synd.SyndEntry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +27,6 @@ import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.*;
 import org.springframework.integration.handler.LoggingHandler;
 import org.springframework.integration.metadata.MetadataStore;
-import org.springframework.integration.metadata.PropertiesPersistingMetadataStore;
 import org.springframework.integration.transformer.AbstractPayloadTransformer;
 import org.springframework.scheduling.support.CronTrigger;
 
@@ -48,15 +48,7 @@ public class FilingAdapter {
     private URL rssUrl;
 
     @Bean
-    public MetadataStore metadataStore() {
-        PropertiesPersistingMetadataStore metadataStore = new PropertiesPersistingMetadataStore();
-        String path = this.getClass().getClassLoader().getResource("application.properties/..").getPath();
-        metadataStore.setBaseDirectory(path + "temp");
-        return metadataStore;
-    }
-
-    @Bean
-    public AbstractPayloadTransformer<SyndEntry, Filings> transformSyndEntry() {
+    public AbstractPayloadTransformer<SyndEntry, Filings> transformToFiling() {
         return new AbstractPayloadTransformer<SyndEntry, Filings>() {
             @Override
             protected Filings transformPayload(SyndEntry entry) {
@@ -105,12 +97,12 @@ public class FilingAdapter {
     }
 
     @Bean
-    public IntegrationFlow myFeedFlow() {
+    public IntegrationFlow filingFlow() {
         return IntegrationFlows
-                .from(new MultiFeedEntryMessageSource(new ArrayList<URL>() {{ add(feedUrl); add(rssUrl); }}, "myKey").setMetadataStore(metadataStore()).preserveWireFeed(true),
+                .from(new MultiFeedEntryMessageSource(new ArrayList<URL>() {{ add(feedUrl); add(rssUrl); }}, "myKey"),
                         e -> e.poller(p -> p.trigger(new CronTrigger("0/5 * * ? * *", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(300))
                 )
-                .transform(transformSyndEntry())
+                .transform(transformToFiling())
                 .channel("myFeedChannel")
                 .log(LoggingHandler.Level.WARN, m -> {
                     Filings f = (Filings)m.getPayload();
