@@ -25,6 +25,7 @@ public class FeedpressParserTest extends AbstractTestCase {
         final FeedpressModule feedpress = (FeedpressModule) feed.getModule(FeedpressModule.URI);
 
         assertNotNull(feedpress);
+        assertEquals("IMCKIFY", feedpress.getCompanyInfo());
         assertEquals("abc123", feedpress.getNewsletterId());
         assertEquals("en", feedpress.getLocale());
         assertEquals("xyz123", feedpress.getPodcastId());

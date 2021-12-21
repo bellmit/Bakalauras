@@ -7,14 +7,13 @@ import com.rometools.rome.feed.module.ModuleImpl;
 
 import java.io.Serializable;
 
-public class FeedpressModuleImpl
-        extends ModuleImpl
-        implements FeedpressModule, Cloneable, Serializable {
+public class FeedpressModuleImpl extends ModuleImpl implements FeedpressModule, Cloneable, Serializable {
 
     private String newsletterId;
     private String locale;
     private String podcastId;
     private String cssFile;
+    private String companyInfo;
 
     public FeedpressModuleImpl() {
         super(FeedpressModule.class, FeedpressModule.URI);
@@ -61,6 +60,16 @@ public class FeedpressModuleImpl
     }
 
     @Override
+    public String getCompanyInfo() {
+        return this.companyInfo;
+    }
+
+    @Override
+    public void setCompanyInfo(String companyInfo) {
+        this.companyInfo = companyInfo;
+    }
+
+    @Override
     public Class<? extends CopyFrom> getInterface() {
         return FeedpressModule.class;
     }
@@ -72,6 +81,7 @@ public class FeedpressModuleImpl
         this.setLocale(feedpress.getLocale());
         this.setPodcastId(feedpress.getPodcastId());
         this.setCssFile(feedpress.getCssFile());
+        this.setCompanyInfo(feedpress.getCompanyInfo());
     }
 
     @Override
@@ -86,6 +96,7 @@ public class FeedpressModuleImpl
         feedpress.setLocale(this.getLocale());
         feedpress.setPodcastId(this.getPodcastId());
         feedpress.setCssFile(this.getCssFile());
+        feedpress.setCompanyInfo(this.getCompanyInfo());
         return feedpress;
     }
 

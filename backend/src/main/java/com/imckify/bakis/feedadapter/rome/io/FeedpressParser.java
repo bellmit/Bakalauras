@@ -43,22 +43,27 @@ public class FeedpressParser implements ModuleParser {
         if (element.getName().equals("channel") || element.getName().equals("feed")) {
             feedpress = new FeedpressModuleImpl();
 
-            final Element newsletterId = element.getChild(FeedpressElement.NEWSLETTER_ID, NS);
+            final Element companyInfo = element.getChild("company-info", NS);
+            if (companyInfo != null && companyInfo.getValue() != null) {
+                feedpress.setCompanyInfo(companyInfo.getValue().trim());
+            }
+
+            final Element newsletterId = element.getChild("newsletterId", NS);
             if (newsletterId != null && newsletterId.getValue() != null) {
                 feedpress.setNewsletterId(newsletterId.getValue().trim());
             }
 
-            final Element locale = element.getChild(FeedpressElement.LOCALE, NS);
+            final Element locale = element.getChild("locale", NS);
             if (locale != null && locale.getValue() != null) {
                 feedpress.setLocale(locale.getValue().trim());
             }
 
-            final Element podcastId = element.getChild(FeedpressElement.PODCAST_ID, NS);
+            final Element podcastId = element.getChild("podcastId", NS);
             if (podcastId != null && podcastId.getValue() != null) {
                 feedpress.setPodcastId(podcastId.getValue().trim());
             }
 
-            final Element cssFile = element.getChild(FeedpressElement.CSS_FILE, NS);
+            final Element cssFile = element.getChild("cssFile", NS);
             if (cssFile != null && cssFile.getValue() != null) {
                 feedpress.setCssFile(cssFile.getValue().trim());
             }

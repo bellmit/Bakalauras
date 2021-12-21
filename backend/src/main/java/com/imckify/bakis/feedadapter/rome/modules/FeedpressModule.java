@@ -69,4 +69,8 @@ public interface FeedpressModule extends Module, CopyFrom {
      */
     void setCssFile(String cssFile);
 
+    String getCompanyInfo();
+
+    void setCompanyInfo(String companyInfo);
+
 }
