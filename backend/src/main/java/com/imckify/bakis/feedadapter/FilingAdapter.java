@@ -1,9 +1,9 @@
 package com.imckify.bakis.feedadapter;
 
 /**
- * EdgarFeedAdapter class is an automatic scheduled background feed poller (otherwise known as adapter) of Edgar
+ * FilingAdapter class is an automatic scheduled background feed poller (otherwise known as adapter) of Edgar
  * RSS/Atom filings. Every 60 seconds prints freshly published filings if there are any. Works between multiple
- * Application runtime sessions. Before stopped, EdgarFeedAdapter updates target/classes/metadata-store.properties file
+ * Application runtime sessions. Before stopped, FilingAdapter updates target/classes/metadata-store.properties file
  * with poll time of last entry and cache state of polled URLs and time polled.
  *
  * Feeds that can be subscribed:
@@ -17,6 +17,7 @@ package com.imckify.bakis.feedadapter;
  * Todo .handle() to simulate database operation
  */
 
+import com.imckify.bakis.models.Filings;
 import com.rometools.rome.feed.synd.SyndEntry;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -38,7 +39,7 @@ import java.util.regex.Pattern;
 
 @Configuration
 @EnableIntegration
-public class EdgarFeedAdapter {
+public class FilingAdapter {
 
     @Value("https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&CIK=&type=&company=&dateb=&owner=include&start=0&count=40&output=atom")
     private URL feedUrl;
@@ -55,10 +56,10 @@ public class EdgarFeedAdapter {
     }
 
     @Bean
-    public AbstractPayloadTransformer<SyndEntry, NewsItem> transformToNewsItem() {
-        return new AbstractPayloadTransformer<SyndEntry, NewsItem>() {
+    public AbstractPayloadTransformer<SyndEntry, Filings> transformSyndEntry() {
+        return new AbstractPayloadTransformer<SyndEntry, Filings>() {
             @Override
-            protected NewsItem transformPayload(SyndEntry entry) {
+            protected Filings transformPayload(SyndEntry entry) {
                 String epoch = ""; // for Long.compare()
                 String description = "";
                 String title = "";
@@ -89,7 +90,15 @@ public class EdgarFeedAdapter {
 
                 String dateReadable = epoch != "" ? new Date(Long.parseLong(epoch)).toString() : "";
 
-                return new NewsItem(title, description, dateReadable); // Filing
+                Filings filing = new Filings();
+                filing.setName(title);
+                filing.setForm(description);
+                filing.setDate(dateReadable);
+                filing.setRef(link);
+                filing.setCik(cik);
+                filing.setAccno(acc);
+//                filing.setCompaniesID();
+                return filing;
             }
         };
 
@@ -101,9 +110,12 @@ public class EdgarFeedAdapter {
                 .from(new MultiFeedEntryMessageSource(new ArrayList<URL>() {{ add(feedUrl); add(rssUrl); }}, "myKey").setMetadataStore(metadataStore()).preserveWireFeed(true),
                         e -> e.poller(p -> p.trigger(new CronTrigger("0/5 * * ? * *", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(300))
                 )
-                .transform(transformToNewsItem())
+                .transform(transformSyndEntry())
                 .channel("myFeedChannel")
-                .log(LoggingHandler.Level.WARN, m -> m.getPayload())
+                .log(LoggingHandler.Level.WARN, m -> {
+                    Filings f = (Filings)m.getPayload();
+                    return f.getDate() + ", " + String.format("%7s", f.getForm()) + ", " + f.getName();
+                })
                 .get();
     }
 }
