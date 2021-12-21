@@ -19,9 +19,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
-public class SimpleTest extends junit.framework.TestCase {
+public class ApacheHttpUserAgentEdgarTests extends junit.framework.TestCase {
 
-    public SimpleTest(String testName) {
+    public ApacheHttpUserAgentEdgarTests(String testName) {
         super(testName);
     }
 
@@ -31,17 +31,20 @@ public class SimpleTest extends junit.framework.TestCase {
         logger.setLevel(Level.DEBUG);
     }
 
-    public void testSubmissionsAgentEmpty() throws IOException {
+    public void testSubmissionsApacheAgentEmptyForbidden() throws IOException {
         String url = "https://data.sec.gov/submissions/CIK0000320193.json";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
-        assertEquals(200 , code);
+        String err = response.getStatusLine().getReasonPhrase();
+
+        assertEquals(403 , code);
+        assertEquals("Forbidden", err);
     }
 
-    public void testSubmissionsAgentRandom() throws IOException {
+    public void testSubmissionsApacheAgentRandomForbidden() throws IOException {
         String url = "https://data.sec.gov/submissions/CIK0000320193.json";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
@@ -49,10 +52,12 @@ public class SimpleTest extends junit.framework.TestCase {
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
-        assertEquals(200 , code);
-    }
+        String err = response.getStatusLine().getReasonPhrase();
 
-    public void testSubmissionsAgentMozilla() throws IOException {
+        assertEquals(403 , code);
+        assertEquals("Forbidden", err);    }
+
+    public void testSubmissionsApacheAgentMozillaForbidden() throws IOException {
         String url = "https://data.sec.gov/submissions/CIK0000320193.json";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
@@ -60,31 +65,36 @@ public class SimpleTest extends junit.framework.TestCase {
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
-        assertEquals(200 , code);
-    }
+        String err = response.getStatusLine().getReasonPhrase();
 
-    public void testSubmissionsAgentFairAccessSuccess() throws IOException {
+        assertEquals(403 , code);
+        assertEquals("Forbidden", err);    }
+
+    public void testSubmissionsApacheAgentFairAccessSuccess() throws IOException {
         String url = "https://data.sec.gov/submissions/CIK0000320193.json";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
-        request.addHeader("User-Agent", "iMckify tomas.duxelis@gmail.com");
+        request.addHeader("User-Agent", "iMckify imckify@gmail.com");
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
+
         assertEquals(200 , code);
     }
 
-    public void testBrowseAgentEmpty() throws IOException {
+    public void testBrowseApacheAgentEmptyForbidden() throws IOException {
         String url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=320193&type=10-K";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
-        assertEquals(200 , code);
-    }
+        String err = response.getStatusLine().getReasonPhrase();
 
-    public void testBrowseAgentMozilla() throws IOException {
+        assertEquals(403 , code);
+        assertEquals("Forbidden", err);    }
+
+    public void testBrowseApacheAgentMozillaForbidden() throws IOException {
         String url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=320193&type=10-K";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
@@ -92,31 +102,48 @@ public class SimpleTest extends junit.framework.TestCase {
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
-        assertEquals(200 , code);
-    }
+        String err = response.getStatusLine().getReasonPhrase();
 
-    public void testBrowseAgentSuccess() throws IOException {
+        assertEquals(403 , code);
+        assertEquals("Forbidden", err);    }
+
+    public void testBrowseApacheAgentSuccess() throws IOException {
         String url = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=320193&type=10-K";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
-        request.addHeader("User-Agent", "iMckify tomas.duxelis@gmail.com");
+        request.addHeader("User-Agent", "iMckify imckify@gmail.com");
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
+
         assertEquals(200 , code);
     }
 
-    public void testRssAgentEmpty() throws IOException {
+    public void testFilingApacheAgentSuccess() throws IOException {
+        String url = "https://www.sec.gov/Archives/edgar/data/320193/000032019321000105/0000320193-21-000105-index.htm";
+        CloseableHttpClient client = HttpClients.createMinimal();
+        HttpUriRequest request = new HttpGet(url);
+        request.addHeader("User-Agent", "iMckify imckify@gmail.com");
+
+        CloseableHttpResponse response = client.execute(request);
+        int code = response.getStatusLine().getStatusCode();
+
+        assertEquals(200 , code);
+    }
+
+    public void testRssApacheAgentEmptyForbidden() throws IOException {
         String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
-        assertEquals(200 , code);
-    }
+        String err = response.getStatusLine().getReasonPhrase();
 
-    public void testRssAgentMozilla() throws IOException {
+        assertEquals(403 , code);
+        assertEquals("Forbidden", err);    }
+
+    public void testRssApacheAgentMozillaForbidden() throws IOException {
         String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
@@ -124,10 +151,12 @@ public class SimpleTest extends junit.framework.TestCase {
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
-        assertEquals(200 , code);
-    }
+        String err = response.getStatusLine().getReasonPhrase();
 
-    public void testRssRome() throws IOException, FeedException {
+        assertEquals(403 , code);
+        assertEquals("Forbidden", err);    }
+
+    public void testRssRomeSuccess() throws IOException, FeedException {
         String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";
 
         SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(url)));
@@ -135,14 +164,15 @@ public class SimpleTest extends junit.framework.TestCase {
         assertTrue(feed.getEntries().size() > 0);
     }
 
-    public void testRssAgentApacheHttpToRomeSuccess() throws IOException, FeedException {
+    public void testRssAgentApacheToRomeSuccess() throws IOException, FeedException {
         String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";
         CloseableHttpClient client = HttpClients.createMinimal();
         HttpUriRequest request = new HttpGet(url);
-        request.addHeader("User-Agent", "iMckify tomas.duxelis@gmail.com");
+        request.addHeader("User-Agent", "iMckify imckify@gmail.com");
 
         CloseableHttpResponse response = client.execute(request);
         int code = response.getStatusLine().getStatusCode();
+
         assertEquals(200 , code);
 
         InputStream stream = response.getEntity().getContent();
@@ -150,5 +180,23 @@ public class SimpleTest extends junit.framework.TestCase {
         SyndFeed feed = input.build(new XmlReader(stream));
 
         assertTrue(feed.getEntries().size() > 0);
+    }
+
+    public void testRssAgentApacheToRomeSuccess2() {
+        String url = "https://www.sec.gov/Archives/edgar/xbrlrss.all.xml";
+
+        try (CloseableHttpClient client = HttpClients.createMinimal()) {
+            HttpUriRequest request = new HttpGet(url);
+            request.addHeader("User-Agent", "iMckify imckify@gmail.com");
+            try (CloseableHttpResponse response = client.execute(request);
+                    InputStream stream = response.getEntity().getContent()) {
+                SyndFeedInput input = new SyndFeedInput();
+                SyndFeed feed = input.build(new XmlReader(stream));
+
+                assertTrue(feed.getEntries().size() > 0);
+            }
+        } catch(IOException | FeedException e) {
+            e.printStackTrace();
+        }
     }
 }
