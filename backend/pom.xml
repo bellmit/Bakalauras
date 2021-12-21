@@ -12,7 +12,7 @@
 	<artifactId>backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>backend</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Backend for Investment portfolio tracking and financial market analysis system</description>
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
@@ -97,6 +97,9 @@
 	</dependencies>
 
 	<build>
+<!--		https://github.com/apache/maven/blob/trunk/maven-model-builder/src/main/resources/org/apache/maven/model/pom-4.0.0.xml#L53-->
+		<directory>${project.basedir}/target</directory>	<!--		sets compile dir to backend/target/		-->
+		<finalName>${project.artifactId}</finalName>		<!--		sets .jar name		-->
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
