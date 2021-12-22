@@ -18,7 +18,7 @@
 	</properties>
 
 	<dependencies>
-<!--	ApacheHttpUserAgentEdgarTests.java -->
+<!--	ApacheHttpClient -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
@@ -44,25 +44,6 @@
 			<optional>true</optional>
 		</dependency>
 
-<!--	/test -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-<!--	JWT -->
-		<dependency>
-			<groupId>io.jsonwebtoken</groupId>
-			<artifactId>jjwt</artifactId>
-			<version>0.9.1</version>
-		</dependency>
-
 <!--	JSON -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
@@ -75,6 +56,19 @@
 			<version>1.1.1</version>
 		</dependency>
 
+<!--	BCryptPasswordEncoder -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
+<!--	JWT -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.1</version>
+		</dependency>
+
 <!--	/models	-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -83,29 +77,28 @@
 			<scope>provided</scope>
 		</dependency>
 
-<!--	BCryptPasswordEncoder -->
+<!--	/repos -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
-
-<!--	spring -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
 		</dependency>
 
-<!--	/repos -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
-
 <!--	CORS -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+<!--	/tests	JUnit 5, Mockito, Spring Test & Spring Boot Test, AssertJ, Hamcrest, JSONassert, and JsonPath-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
