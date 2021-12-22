@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @EnableConfigurationProperties
 @EnableJpaRepositories(basePackages = "com.imckify.bakis.repos")
@@ -66,8 +67,8 @@ public class Bakis {
 	@Bean
 	public MetadataStore metadataStore() {
 		PropertiesPersistingMetadataStore metadataStore = new PropertiesPersistingMetadataStore();
-		String path = this.getClass().getClassLoader().getResource("application.properties/..").getPath();
-		metadataStore.setBaseDirectory(path);
+		String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("application.properties/..")).getPath();
+		metadataStore.setBaseDirectory(path + "temp");
 		return metadataStore;
 	}
 
