@@ -1,6 +1,6 @@
 package com.imckify.bakis.controllers;
 
-import com.imckify.bakis.exceptions.ResourceNotFoundException;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import com.imckify.bakis.models.Trades;
 import com.imckify.bakis.repos.TradesRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +29,7 @@ public class TradesControl {
     public ResponseEntity<List<Trades>> getInvestorTrades(@PathVariable(value = "id") int id){
         Optional<List<Trades>> Trades = this.TradesRepo.findByInvestorsID(id);
 
-        if(Trades.isPresent()){
-            return  ResponseEntity.ok().body(Trades.get());
-        } else {
-            return ResponseEntity.ok().build();
-        }
+        return Trades.map(trades -> ResponseEntity.ok().body(trades)).orElseGet(() -> ResponseEntity.ok().build());
     }
 
     @GetMapping("/{id}")

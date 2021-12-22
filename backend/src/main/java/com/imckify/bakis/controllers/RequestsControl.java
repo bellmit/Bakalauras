@@ -1,6 +1,6 @@
 package com.imckify.bakis.controllers;
 
-import com.imckify.bakis.exceptions.ResourceNotFoundException;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import com.imckify.bakis.models.Requests;
 import com.imckify.bakis.repos.RequestsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,22 +28,14 @@ public class RequestsControl {
     public ResponseEntity<List<Requests>> getUnapprovedRequests() {
         Optional<List<Requests>> Requests = this.RequestsRepo.findByAnalystsIDIsNull();
 
-        if(Requests.isPresent()){
-            return  ResponseEntity.ok().body(Requests.get());
-        } else {
-            return ResponseEntity.ok().build();
-        }
+        return Requests.map(requests -> ResponseEntity.ok().body(requests)).orElseGet(() -> ResponseEntity.ok().build());
     }
 
     @GetMapping("/investor/{id}")
     public ResponseEntity<List<Requests>> getInvestorRequests(@PathVariable(value = "id") int id){
         Optional<List<Requests>> Requests = this.RequestsRepo.findByInvestorsID(id);
 
-        if(Requests.isPresent()){
-            return  ResponseEntity.ok().body(Requests.get());
-        } else {
-            return ResponseEntity.ok().build();
-        }
+        return Requests.map(requests -> ResponseEntity.ok().body(requests)).orElseGet(() -> ResponseEntity.ok().build());
     }
 
     @GetMapping("/{id}")

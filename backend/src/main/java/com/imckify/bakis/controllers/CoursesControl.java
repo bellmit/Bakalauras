@@ -1,6 +1,6 @@
 package com.imckify.bakis.controllers;
 
-import com.imckify.bakis.exceptions.ResourceNotFoundException;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import com.imckify.bakis.models.Courses;
 import com.imckify.bakis.repos.CoursesRepo;
 import org.springframework.beans.factory.annotation.Autowired;

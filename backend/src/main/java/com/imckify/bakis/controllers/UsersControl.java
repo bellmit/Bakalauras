@@ -2,7 +2,8 @@ package com.imckify.bakis.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.imckify.bakis.exceptions.ResourceNotFoundException;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import com.imckify.bakis.models.Users;
 import com.imckify.bakis.repos.UsersRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -137,17 +138,18 @@ public class UsersControl {
         try {
             String sql = "INSERT INTO Portfolios (`value`, `changeValue`, `date`) VALUES (NULL,NULL,NULL)";
             Class.forName("com.mysql.cj.jdbc.Driver");
-            Connection con= DriverManager.getConnection(dbUrl,dbUsername,dbPassword);
-            PreparedStatement stmt =con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            Connection conn = DriverManager.getConnection(dbUrl,dbUsername,dbPassword);
+            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.execute();
             try(ResultSet rs = stmt.getGeneratedKeys()) {
                 if(rs.next()) {
                     return Integer.parseInt(rs.getObject(1).toString());  // <-- contains the generated key
                 }
             }
-            con.close();
+            conn.close();
         } catch(Exception e) {
-            System.out.println(e); }
+            LoggerFactory.getLogger(UsersControl.class).error("retrieveID(): " + e.getMessage(), e);
+        }
         return id;
     }
 
@@ -155,16 +157,15 @@ public class UsersControl {
         Date nowDate = new Date();
         Instant now = nowDate.toInstant();
 
-        String jwtToken = Jwts.builder()
+        return Jwts.builder()
                 .claim("UserID", id)
                 .claim("id", id)
                 .claim("username", username)
 //                .setSubject("Investor1")
                 .setId(UUID.randomUUID().toString())
                 .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plus(5l, ChronoUnit.MINUTES)))
+                .setExpiration(Date.from(now.plus(5L, ChronoUnit.MINUTES)))
                 .compact();
-        return jwtToken;
     }
 }
 

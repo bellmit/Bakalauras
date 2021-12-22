@@ -1,6 +1,6 @@
 package com.imckify.bakis.controllers;
 
-import com.imckify.bakis.exceptions.ResourceNotFoundException;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import com.imckify.bakis.models.Notifications;
 import com.imckify.bakis.repos.NotificationsRepo;
 import org.slf4j.Logger;
@@ -32,11 +32,7 @@ public class NotificationsControl {
     public ResponseEntity<List<Notifications>> getInvestorNotifications(@PathVariable(value = "id") int id){
         Optional<List<Notifications>> Notifications = this.NotificationsRepo.findByInvestorsID(id);
 
-        if(Notifications.isPresent()){
-            return  ResponseEntity.ok().body(Notifications.get());
-        } else {
-            return ResponseEntity.ok().build();
-        }
+        return Notifications.map(notifications -> ResponseEntity.ok().body(notifications)).orElseGet(() -> ResponseEntity.ok().build());
     }
 
     @GetMapping("/{id}")
