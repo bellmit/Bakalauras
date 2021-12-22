@@ -1,4 +1,4 @@
-package com.imckify.bakis.feedadapter;
+package com.imckify.bakis.adapters.feed;
 
 /**
  * FilingAdapter class is an automatic scheduled background feed poller (otherwise known as adapter) of Edgar

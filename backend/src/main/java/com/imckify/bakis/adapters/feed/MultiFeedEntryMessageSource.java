@@ -1,4 +1,4 @@
-package com.imckify.bakis.feedadapter;
+package com.imckify.bakis.adapters.feed;
 
 /*
  * Copyright 2021 the original author or authors.
