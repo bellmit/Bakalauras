@@ -19,20 +19,20 @@ package com.imckify.bakis.feedadapter;
 
 import com.imckify.bakis.models.Filings;
 import com.rometools.rome.feed.synd.SyndEntry;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.*;
 import org.springframework.integration.handler.LoggingHandler;
-import org.springframework.integration.metadata.MetadataStore;
 import org.springframework.integration.transformer.AbstractPayloadTransformer;
 import org.springframework.scheduling.support.CronTrigger;
 
+import javax.annotation.PostConstruct;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,11 +41,13 @@ import java.util.regex.Pattern;
 @EnableIntegration
 public class FilingAdapter {
 
-    @Value("https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&CIK=&type=&company=&dateb=&owner=include&start=0&count=40&output=atom")
-    private URL feedUrl;
+    private List<URL> feedUrls = new ArrayList<>();
 
-    @Value("https://www.sec.gov/Archives/edgar/xbrlrss.all.xml")
-    private URL rssUrl;
+    @PostConstruct
+    private void setFeeds() throws MalformedURLException {
+        // feedUrls.add(new URL("https://www.sec.gov/Archives/edgar/xbrlrss.all.xml"));
+        feedUrls.add(new URL("https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=10-K,10-Q&start=0&count=100&output=atom"));
+    }
 
     @Bean
     public AbstractPayloadTransformer<SyndEntry, Filings> transformToFiling() {
@@ -96,10 +98,20 @@ public class FilingAdapter {
 
     }
 
+//    @Bean
+//    public IntegrationFlow rssFeedFlow() {
+//        return IntegrationFlows.fromSupplier(() -> new SyndFeedInput().build(new XmlReader(this.feedResource.getInputStream())),
+//                spec -> spec.poller(p -> p.fixedDelay(5000).maxMessagesPerPoll(5)))
+//                .channel("outputChannel")
+//                .get();
+//    }
+//The point of individual entries emission that FeedEntryMessageSource does some other logic like caching and filtering.
+//Therefore it doesn't bring too much value for the framework to have a plain SyndFeed producer which may get the same data on every single polling cycle.
+
     @Bean
     public IntegrationFlow filingFlow() {
         return IntegrationFlows
-                .from(new MultiFeedEntryMessageSource(new ArrayList<URL>() {{ add(feedUrl); add(rssUrl); }}, "myKey"),
+                .from(new MultiFeedEntryMessageSource(feedUrls, "myKey"),
                         e -> e.poller(p -> p.trigger(new CronTrigger("0/5 * * ? * *", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(300))
                 )
                 .transform(transformToFiling())

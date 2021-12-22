@@ -39,8 +39,14 @@ import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
 
 /**
+ * Main difference from implementing IntegrationFlows.fromSupplier(() -> urlList).channel("urls").get() +
+ * IntegrationFlows.from("urls").handle(create {org.springframework.integration.feed.inbound.FeedEntryMessageSource} adapter)
+ * is that MultiFeedEntryMessageSource sorts {@link SyndEntry}s not by feed url and updateDate but by only updateDate,
+ * therefore mixes feeds.
+ *
+ *
  * This implementation of {@link org.springframework.integration.core.MessageSource} will
- * produce individual {@link SyndEntry}s for a multiples feeds identified with the 'feedUrls'
+ * poll individual {@link SyndEntry}s from multiple feeds identified with the 'feedUrls'
  * attribute.
  *
  * @author <a href="https://github.com/iMckify">Rokas Mockevicius</a>
@@ -176,9 +182,12 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
                 }
             }
         }
-        // mixing looped feed entry blocks, so entries are ungrouped
+
+        // ungrouping entries from feed blocks (mixing feeds)
         newEntries = newEntries.stream().sorted((e1, e2) -> new SyndEntryPublishedDateComparator().compare(e1.getValue(), e2.getValue())).collect(Collectors.toList());
-        this.entries.addAll(newEntries); // must me sorted in ascending order, so each poll from FIFO queue will increase this.lastTimes
+
+        // newEntries must be sorted in ascending order, so each poll from FIFO queue will increase this.lastTimes
+        this.entries.addAll(newEntries);
     }
 
     private Map<URL, SyndFeed> getFeeds() {
@@ -211,8 +220,7 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
 
     private static final class SyndEntryPublishedDateComparator implements Comparator<SyndEntry>, Serializable {
 
-        SyndEntryPublishedDateComparator() {
-        }
+        SyndEntryPublishedDateComparator() {}
 
         @Override
         public int compare(SyndEntry entry1, SyndEntry entry2) {
