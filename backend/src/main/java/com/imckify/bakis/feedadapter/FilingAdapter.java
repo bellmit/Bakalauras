@@ -45,7 +45,7 @@ public class FilingAdapter {
 
     @PostConstruct
     private void setFeeds() throws MalformedURLException {
-        // feedUrls.add(new URL("https://www.sec.gov/Archives/edgar/xbrlrss.all.xml"));
+        // url with filter is better than filtering feed entries when processing
         feedUrls.add(new URL("https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=10-K,10-Q&start=0&count=100&output=atom"));
     }
 
@@ -98,16 +98,6 @@ public class FilingAdapter {
 
     }
 
-//    @Bean
-//    public IntegrationFlow rssFeedFlow() {
-//        return IntegrationFlows.fromSupplier(() -> new SyndFeedInput().build(new XmlReader(this.feedResource.getInputStream())),
-//                spec -> spec.poller(p -> p.fixedDelay(5000).maxMessagesPerPoll(5)))
-//                .channel("outputChannel")
-//                .get();
-//    }
-//The point of individual entries emission that FeedEntryMessageSource does some other logic like caching and filtering.
-//Therefore it doesn't bring too much value for the framework to have a plain SyndFeed producer which may get the same data on every single polling cycle.
-
     @Bean
     public IntegrationFlow filingFlow() {
         return IntegrationFlows
@@ -117,7 +107,7 @@ public class FilingAdapter {
                 .transform(transformToFiling())
                 .channel("myFeedChannel")
                 .log(LoggingHandler.Level.WARN, m -> {
-                    Filings f = (Filings)m.getPayload();
+                    Filings f = (Filings) m.getPayload();
                     return f.getDate() + ", " + String.format("%7s", f.getForm()) + ", " + f.getName();
                 })
                 .get();
