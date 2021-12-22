@@ -2,10 +2,10 @@ package com.imckify.bakis.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import com.imckify.bakis.Bakis.ResourceNotFoundException;
 import com.imckify.bakis.models.Users;
 import com.imckify.bakis.repos.UsersRepo;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;

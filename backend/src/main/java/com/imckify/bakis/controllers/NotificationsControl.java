@@ -1,6 +1,6 @@
 package com.imckify.bakis.controllers;
 
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import com.imckify.bakis.Bakis.ResourceNotFoundException;
 import com.imckify.bakis.models.Notifications;
 import com.imckify.bakis.repos.NotificationsRepo;
 import org.slf4j.Logger;

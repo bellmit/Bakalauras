@@ -5,14 +5,18 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.HttpStatus;
 import org.springframework.integration.metadata.MetadataStore;
 import org.springframework.integration.metadata.PropertiesPersistingMetadataStore;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@EnableCaching
+@EnableScheduling
 @EnableConfigurationProperties
 @EnableJpaRepositories(basePackages = "com.imckify.bakis.repos")
 @SpringBootApplication(exclude = {SecurityAutoConfiguration.class })
@@ -79,5 +85,12 @@ public class Bakis {
 		private List<URL> feeds = new ArrayList<>();
 
 		public List<URL> getFeeds() { return this.feeds; }
+	}
+
+	@ResponseStatus(value =  HttpStatus.NOT_FOUND)
+	public static class ResourceNotFoundException extends RuntimeException{
+		public  ResourceNotFoundException(String message){
+			super(message);
+		}
 	}
 }
