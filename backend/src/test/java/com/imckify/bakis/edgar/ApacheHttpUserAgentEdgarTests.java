@@ -1,4 +1,4 @@
-package com.imckify.bakis;
+package com.imckify.bakis.edgar;
 
 
 import com.rometools.rome.feed.synd.SyndFeed;

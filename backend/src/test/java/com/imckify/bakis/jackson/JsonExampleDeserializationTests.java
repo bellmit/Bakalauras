@@ -1,9 +1,10 @@
-package com.imckify.bakis.jackson.streaming;
+package com.imckify.bakis.jackson;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.jupiter.api.Test;
@@ -16,9 +17,9 @@ import java.util.*;
 /**
  *  https://www.journaldev.com/2324/jackson-json-java-parser-api-example-tutorial
  */
-public class DeserializationTests {
+public class JsonExampleDeserializationTests {
 
-    public static Employee createEmployee() {
+    public Employee createEmployee() {
 
         Employee emp = new Employee();
         emp.setId(100);
@@ -99,7 +100,7 @@ public class DeserializationTests {
         System.out.println("Employee Object\n\n"+emp);
     }
 
-    private static void parseJSON(JsonParser jsonParser, Employee emp,
+    private void parseJSON(JsonParser jsonParser, Employee emp,
                                   List<Long> phoneNums, boolean insidePropertiesObj) throws JsonParseException, IOException {
 
         //loop through the JsonTokens
@@ -149,6 +150,131 @@ public class DeserializationTests {
                     emp.getProperties().put(key, value);
                 }
             }
+        }
+    }
+
+    public static class Employee {
+
+        private int id;
+        private String name;
+        private boolean permanent;
+        private Address address;
+        private long[] phoneNumbers;
+        private String role;
+        private List<String> cities;
+        private Map<String, String> properties;
+
+        public Employee() {
+        }
+
+        public int getId() {
+            return id;
+        }
+        public void setId(int id) {
+            this.id = id;
+        }
+        public String getName() {
+            return name;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+        public boolean isPermanent() {
+            return permanent;
+        }
+        public void setPermanent(boolean permanent) {
+            this.permanent = permanent;
+        }
+        public Address getAddress() {
+            return address;
+        }
+        public void setAddress(Address address) {
+            this.address = address;
+        }
+        public long[] getPhoneNumbers() {
+            return phoneNumbers;
+        }
+        public void setPhoneNumbers(long[] phoneNumbers) {
+            this.phoneNumbers = phoneNumbers;
+        }
+        public String getRole() {
+            return role;
+        }
+        public void setRole(String role) {
+            this.role = role;
+        }
+
+        @Override
+        public String toString(){
+            StringBuilder sb = new StringBuilder();
+            sb.append("***** Employee Details *****\n");
+            sb.append("ID="+getId()+"\n");
+            sb.append("Name="+getName()+"\n");
+            sb.append("Permanent="+isPermanent()+"\n");
+            sb.append("Role="+getRole()+"\n");
+            sb.append("Phone Numbers="+ Arrays.toString(getPhoneNumbers())+"\n");
+            sb.append("Address="+getAddress()+"\n");
+            sb.append("Cities="+Arrays.toString(getCities().toArray())+"\n");
+            sb.append("Properties="+getProperties()+"\n");
+            sb.append("*****************************");
+
+            return sb.toString();
+        }
+        public List<String> getCities() {
+            return cities;
+        }
+        public void setCities(List<String> cities) {
+            this.cities = cities;
+        }
+        public Map<String, String> getProperties() {
+            return properties;
+        }
+        public void setProperties(Map<String, String> properties) {
+            this.properties = properties;
+        }
+    }
+
+    public static class Address {
+        private String street;
+        private String city;
+        private int zipcode;
+
+        public Address() {
+        }
+
+        public Address(String street, String city, int zipcode) {
+            this.street = street;
+            this.city = city;
+            this.zipcode = zipcode;
+        }
+
+        public String getStreet() {
+            return street;
+        }
+
+        public void setStreet(String street) {
+            this.street = street;
+        }
+
+        public String getCity() {
+            return city;
+        }
+
+        public void setCity(String city) {
+            this.city = city;
+        }
+
+        public int getZipcode() {
+            return zipcode;
+        }
+
+        public void setZipcode(int zipcode) {
+            this.zipcode = zipcode;
+        }
+
+        @Override
+        public String toString() {
+            return getStreet() + ", " + getCity() + ", " + getZipcode();
         }
     }
 }
