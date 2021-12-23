@@ -1,4 +1,4 @@
-package com.imckify.bakis.jackson.my;
+package com.imckify.bakis.adapters.company;
 
 public class Filing {
 
