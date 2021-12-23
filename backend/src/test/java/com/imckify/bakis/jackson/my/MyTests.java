@@ -51,7 +51,9 @@ public class MyTests {
                 Field attr = f.getClass().getField(arrName);
                 // attr.setAccessible(true);
                 if (arrName.startsWith("is")) {
-                    attr.set(f, jsonParser.getValueAsString());
+                    attr.set(f, jsonParser.getValueAsBoolean());
+                } else if (arrName.equals("size")) {
+                    attr.set(f, jsonParser.getLongValue());
                 } else {
                     attr.set(f, jsonParser.getValueAsString());
                 }

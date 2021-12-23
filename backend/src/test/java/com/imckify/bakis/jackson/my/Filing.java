@@ -11,30 +11,13 @@ public class Filing {
     public String fileNumber;
     public String filmNumber;
     public String items;
-    public String size;
+    public long size;
     public boolean isXBRL;
     public boolean isInlineXBRL;
     public String primaryDocument;
     public String primaryDocDescription;
 
     public Filing() {}
-
-    public Filing(String accessionNumber, String filingDate, String reportDate, String acceptanceDateTime, String act, String form, String fileNumber, String filmNumber, String items, String size, boolean isXBRL, boolean isInlineXBRL, String primaryDocument, String primaryDocDescription) {
-        this.accessionNumber = accessionNumber;
-        this.filingDate = filingDate;
-        this.reportDate = reportDate;
-        this.acceptanceDateTime = acceptanceDateTime;
-        this.act = act;
-        this.form = form;
-        this.fileNumber = fileNumber;
-        this.filmNumber = filmNumber;
-        this.items = items;
-        this.size = size;
-        this.isXBRL = isXBRL;
-        this.isInlineXBRL = isInlineXBRL;
-        this.primaryDocument = primaryDocument;
-        this.primaryDocDescription = primaryDocDescription;
-    }
 
     public String getAccessionNumber() {
         return accessionNumber;
@@ -108,11 +91,11 @@ public class Filing {
         this.items = items;
     }
 
-    public String getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(String size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
