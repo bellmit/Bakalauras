@@ -13,12 +13,19 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import static com.imckify.bakis.adapters.company.FilingRecent.parseJSON;
 
@@ -26,11 +33,26 @@ import static com.imckify.bakis.adapters.company.FilingRecent.parseJSON;
 public class CompanyInfoService {
     public static final Logger logger = LoggerFactory.getLogger(CompanyInfoService.class);
 
-    @Cacheable(value="getSubmission") // keyGenerator="keygen"
-    public Submission getSubmission() {
+//    @Bean
+//    public long systemNow() {
+//        return System.currentTimeMillis();
+//    }
+
+    private long dateStringToEpochEST(String dateString) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("EST"));
+        Date date = sdf.parse(dateString);
+        long epoch = date.toInstant().toEpochMilli();
+        return epoch;
+    }
+
+//    @Cacheable(value="getSubmission", key = "#cik") // keyGenerator="keygen"
+//    @CachePut(value="getSubmission", key = "#result.tickers.get(0)", unless="#result.filings.get(0).filingDate > System.currentTimeMillis()") // caches submissions before now
+    // Todo get lastModified
+    public Submission getSubmission(String cik) {
         logger.info("Executing Cacheable {}()", new Object(){}.getClass().getEnclosingMethod().getName());
 
-        String url = "https://data.sec.gov/submissions/CIK0000320193.json";
+        String url = "https://data.sec.gov/submissions/CIK" + cik + ".json";
 
         try (CloseableHttpClient client = HttpClients.createMinimal()) {
             HttpUriRequest request = new HttpGet(url);
@@ -44,15 +66,19 @@ public class CompanyInfoService {
 
                 List<FilingRecent> filings = parseJSON(node.toString());
 
+                FilingRecent last10K = filings.stream().filter(f -> f.getForm().equals("10-K")).collect(Collectors.toList()).get(0);
+                String dateString = last10K.getFilingDate();
+
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 // mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
                 ObjectReader reader = mapper.readerFor(new TypeReference<Submission>() {});
                 Submission sub = reader.readValue(root);
                 sub.setFilings(filings);
+                sub.setLastModified(dateStringToEpochEST(dateString));
 
                 return sub;
             }
-        } catch(IOException e) {
+        } catch(IOException | ParseException e) {
             e.printStackTrace();
         }
         return new Submission();

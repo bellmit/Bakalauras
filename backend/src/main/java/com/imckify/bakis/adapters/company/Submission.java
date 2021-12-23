@@ -20,4 +20,6 @@ public class Submission {
     private String fiscalYearEnd;
     @JsonIgnore // @JsonIgnoreProperties would ignore only undeclared props
     private List<FilingRecent> filings;
+    @JsonIgnore
+    private long lastModified;
 }

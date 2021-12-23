@@ -22,7 +22,11 @@ public class CompanyInfoAdapter {
     @Scheduled(fixedRate = 1000 * 5)
     private void getCompanyInfo() throws Exception {
         logger.info("Executing scheduled task {}()", new Object(){}.getClass().getEnclosingMethod().getName());
-        Submission submission = service.getSubmission();
+
+        String cik = "0000320193";
+        String cikFormatted = ("0000000000" + cik).substring(cik.length());
+
+        Submission submission = service.getSubmission(cikFormatted);
         Cache cache = this.cacheManager.getCache("getSubmission"); // debug spring cache
 
         System.out.println("==============================================");
