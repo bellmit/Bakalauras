@@ -22,23 +22,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class SubmissionJsonTests {
 
     @Test
-    public void testMyDto()
-            throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        List<MyDto> listOfDtos = Lists.newArrayList(
-                new MyDto("a", 1, true),
-                new MyDto("bc", 3, false)
-        );
-        String jsonArray = mapper.writeValueAsString(listOfDtos);
-
-        // [{"stringValue":"a","intValue":1,"booleanValue":true},
-        // {"stringValue":"bc","intValue":3,"booleanValue":false}]
-
-        MyDto[] asArray = mapper.readerFor(MyDto[].class).readValue(jsonArray);
-        assertTrue(asArray instanceof MyDto[]);
-    }
-
-    @Test
     public void testUnwantedResult() throws IOException {
         String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("submission.json")).getPath();
         File json = new File(path);
@@ -46,28 +29,28 @@ public class SubmissionJsonTests {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(json);
         JsonNode node = root.get("filings").get("recent");
-        ObjectReader arrayReader = mapper.readerFor(String[].class); //String[].class // new TypeReference<String[]>(){}
 
-        List<String> accList = Arrays.asList(arrayReader.readValue(node.get("accessionNumber")));
-
-        RecentFilings result = mapper.treeToValue(node, RecentFilings.class);
-        RecentFilings result2 = mapper.readValue(node.toString(), new TypeReference<RecentFilings>() {});
 
         // Todo i need latest 10-K. if there was one, update company info. Save last 10-K date like in db!!!!!
-        List nodesList = StreamSupport.stream(node.spliterator(), false).collect(Collectors.toList()); // not eq to node
+        // Todo use JsonSubmissionParseFilingsTests.java
 
-        HashMap<String,Object> filings = mapper.readValue(node.toString(), new TypeReference<HashMap<String,Object>>() {});
-        List<List> arrayContainer = filings.entrySet().stream().map(e -> {
-            return (List) e.getValue(); // Todo Entry
-        }).collect(Collectors.toList()); // jis isbarsto eiliskuma
 
-        List e0List = arrayContainer.stream().map(list -> {
-            return list.get(0);
-        }).collect(Collectors.toList());
 
-        assertNotNull(result);
-        assertEquals(result.accessionNumber, accList);
-        assertEquals(result.accessionNumber, result2.accessionNumber);
+//        ObjectReader arrayReader = mapper.readerFor(String[].class); //String[].class // new TypeReference<String[]>(){}
+//        List<String> accList = Arrays.asList(arrayReader.readValue(node.get("accessionNumber")));
+//        RecentFilings result = mapper.treeToValue(node, RecentFilings.class);
+//        RecentFilings result2 = mapper.readValue(node.toString(), new TypeReference<RecentFilings>() {});
+//        List nodesList = StreamSupport.stream(node.spliterator(), false).collect(Collectors.toList()); // not eq to node
+//        HashMap<String,Object> filings = mapper.readValue(node.toString(), new TypeReference<HashMap<String,Object>>() {});
+//        List<List> arrayContainer = filings.entrySet().stream().map(e -> {
+//            return (List) e.getValue();
+//        }).collect(Collectors.toList()); // jis isbarsto eiliskuma
+//        List e0List = arrayContainer.stream().map(list -> {
+//            return list.get(0);
+//        }).collect(Collectors.toList());
+//        assertNotNull(result);
+//        assertEquals(result.accessionNumber, accList);
+//        assertEquals(result.accessionNumber, result2.accessionNumber);
     }
 
     private static class RecentFilings {
@@ -103,32 +86,5 @@ public class SubmissionJsonTests {
 
     }
 
-    private static class MyDto {
-//        @JsonProperty
-        String stringValue;
-//        @JsonProperty
-        int intValue;
-//        @JsonProperty
-        boolean booleanValue;
 
-        public MyDto() {}
-
-        public MyDto(String stringValue, int intValue, boolean booleanValue) {
-            this.stringValue = stringValue;
-            this.intValue = intValue;
-            this.booleanValue = booleanValue;
-        }
-
-        public String getStringValue() {
-            return stringValue;
-        }
-
-        public int getIntValue() {
-            return intValue;
-        }
-
-        public boolean isBooleanValue() {
-            return booleanValue;
-        }
-    }
 }
