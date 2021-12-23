@@ -1,5 +1,6 @@
 package com.imckify.bakis.adapters.company;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,5 +18,6 @@ public class Submission {
     private List<String> tickers;
     private List<String> exchanges;
     private String fiscalYearEnd;
+    @JsonIgnore // @JsonIgnoreProperties would ignore only undeclared props
     private List<FilingRecent> filings;
 }
