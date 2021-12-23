@@ -1,10 +1,12 @@
 package com.imckify.bakis;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -16,6 +18,23 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SubmissionJsonTests {
+
+    @Test
+    public void testMyDto()
+            throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        List<MyDto> listOfDtos = Lists.newArrayList(
+                new MyDto("a", 1, true),
+                new MyDto("bc", 3, false)
+        );
+        String jsonArray = mapper.writeValueAsString(listOfDtos);
+
+        // [{"stringValue":"a","intValue":1,"booleanValue":true},
+        // {"stringValue":"bc","intValue":3,"booleanValue":false}]
+
+        MyDto[] asArray = mapper.readerFor(MyDto[].class).readValue(jsonArray);
+        assertTrue(asArray instanceof MyDto[]);
+    }
 
     @Test
     public void testUnwantedResult() throws IOException {
@@ -43,34 +62,51 @@ public class SubmissionJsonTests {
 
     private static class RecentFilings {
 
-        @JsonProperty(value="accessionNumber")
+        @JsonProperty()
         private List<String> accessionNumber;
-        @JsonProperty(value="filingDate")
+        @JsonProperty()
         private List<String> filingDate;
-        @JsonProperty(value="reportDate")
+        @JsonProperty()
         private List<String> reportDate;
-        @JsonProperty(value="acceptanceDateTime")
+        @JsonProperty()
         private List<String> acceptanceDateTime;
-        @JsonProperty(value="act")
+        @JsonProperty()
         private List<String> act;
-        @JsonProperty(value="form")
+        @JsonProperty()
         private List<String> form;
-        @JsonProperty(value="fileNumber")
+        @JsonProperty()
         private List<String> fileNumber;
-        @JsonProperty(value="filmNumber")
+        @JsonProperty()
         private List<String> filmNumber;
-        @JsonProperty(value="items")
+        @JsonProperty()
         private List<String> items;
-        @JsonProperty(value="size")
+        @JsonProperty()
         private List<String> size;
-        @JsonProperty(value="isXBRL")
+        @JsonProperty()
         private List<String> isXBRL;
-        @JsonProperty(value="isInlineXBRL")
+        @JsonProperty()
         private List<String> isInlineXBRL;
-        @JsonProperty(value="primaryDocument")
+        @JsonProperty()
         private List<String> primaryDocument;
-        @JsonProperty(value="primaryDocDescription")
+        @JsonProperty()
         private List<String> primaryDocDescription;
 
+    }
+
+    private static class MyDto {
+        @JsonProperty
+        String stringValue;
+        @JsonProperty
+        int intValue;
+        @JsonProperty
+        boolean booleanValue;
+
+        public MyDto() {}
+
+        public MyDto(String stringValue, int intValue, boolean booleanValue) {
+            this.stringValue = stringValue;
+            this.intValue = intValue;
+            this.booleanValue = booleanValue;
+        }
     }
 }
