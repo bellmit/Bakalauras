@@ -1,6 +1,5 @@
 package com.imckify.bakis;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,8 +11,11 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -51,9 +53,17 @@ public class SubmissionJsonTests {
         RecentFilings result = mapper.treeToValue(node, RecentFilings.class);
         RecentFilings result2 = mapper.readValue(node.toString(), new TypeReference<RecentFilings>() {});
 
-        // Todo
-//        RecentFilings mylist = mapper.readValue(node.toString(), new TypeReference<RecentFilings>() {});
+        // Todo i need latest 10-K. if there was one, update company info. Save last 10-K date like in db!!!!!
+        List nodesList = StreamSupport.stream(node.spliterator(), false).collect(Collectors.toList()); // not eq to node
 
+        HashMap<String,Object> filings = mapper.readValue(node.toString(), new TypeReference<HashMap<String,Object>>() {});
+        List<List> arrayContainer = filings.entrySet().stream().map(e -> {
+            return (List) e.getValue(); // Todo Entry
+        }).collect(Collectors.toList()); // jis isbarsto eiliskuma
+
+        List e0List = arrayContainer.stream().map(list -> {
+            return list.get(0);
+        }).collect(Collectors.toList());
 
         assertNotNull(result);
         assertEquals(result.accessionNumber, accList);
