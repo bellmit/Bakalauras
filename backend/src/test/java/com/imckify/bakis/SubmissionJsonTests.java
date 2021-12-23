@@ -94,11 +94,11 @@ public class SubmissionJsonTests {
     }
 
     private static class MyDto {
-        @JsonProperty
+//        @JsonProperty
         String stringValue;
-        @JsonProperty
+//        @JsonProperty
         int intValue;
-        @JsonProperty
+//        @JsonProperty
         boolean booleanValue;
 
         public MyDto() {}
@@ -107,6 +107,18 @@ public class SubmissionJsonTests {
             this.stringValue = stringValue;
             this.intValue = intValue;
             this.booleanValue = booleanValue;
+        }
+
+        public String getStringValue() {
+            return stringValue;
+        }
+
+        public int getIntValue() {
+            return intValue;
+        }
+
+        public boolean isBooleanValue() {
+            return booleanValue;
         }
     }
 }
