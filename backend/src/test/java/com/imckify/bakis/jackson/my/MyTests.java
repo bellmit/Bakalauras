@@ -5,15 +5,15 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.ConfigurablePropertyAccessor;
+import org.springframework.beans.PropertyAccessorFactory;
 
 import java.io.File;
 import java.io.IOException;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 public class MyTests {
-
 
     private final String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("my.json")).getPath();
     private final File jsonFile = new File(path);
@@ -48,14 +48,14 @@ public class MyTests {
             jsonParser.nextToken();
             for (int i = 0; jsonParser.nextToken() != JsonToken.END_ARRAY; i++) {
                 Filing f = container.get(i);
-                Field attr = f.getClass().getField(arrName);
-                // attr.setAccessible(true);
+                ConfigurablePropertyAccessor accessor = PropertyAccessorFactory.forDirectFieldAccess(f);
+
                 if (arrName.startsWith("is")) {
-                    attr.set(f, jsonParser.getValueAsBoolean());
+                    accessor.setPropertyValue(arrName, jsonParser.getValueAsBoolean());
                 } else if (arrName.equals("size")) {
-                    attr.set(f, jsonParser.getLongValue());
+                    accessor.setPropertyValue(arrName, jsonParser.getLongValue());
                 } else {
-                    attr.set(f, jsonParser.getValueAsString());
+                    accessor.setPropertyValue(arrName, jsonParser.getValueAsString());
                 }
             }
         }
