@@ -13,10 +13,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -36,12 +32,6 @@ public class CompanyInfoAdapter {
 
     public static final Logger logger = LoggerFactory.getLogger(CompanyInfoAdapter.class);
 
-    @Autowired
-    CompanyInfoAdapter self;
-
-    @Autowired
-    CacheManager cacheManager;
-
     @Scheduled(fixedRate = 1000 * 5)
     private void getCompanyInfo() {
         logger.info("Executing scheduled task {}()", new Object(){}.getClass().getEnclosingMethod().getName());
@@ -49,10 +39,9 @@ public class CompanyInfoAdapter {
         String cik = "0000320193";
         String cikFormatted = ("0000000000" + cik).substring(cik.length());
 
-        Submission submission = self.getSubmission(cikFormatted);
+        Submission submission = getSubmission(cikFormatted);
 
-        Cache cache = this.cacheManager.getCache("getSubmission"); // debug spring cache
-
+        logger.info("Received {} company info", submission.getTickers().get(0));
         System.out.println("==============================================");
     }
 
@@ -64,12 +53,8 @@ public class CompanyInfoAdapter {
         return epoch;
     }
 
-    @Cacheable(value="getSubmission", key = "#cik") // does store AAPL
-//    @Cacheable(value="getSubmission", key = "#cik", unless = "#result.tickers[0].equals(\"AAPL\")") // does not store AAPL
-//    @CachePut(value="getSubmission", key = "#result.tickers.get(0)", unless="#result.filings.get(0).filingDate > System.currentTimeMillis()") // caches submissions before now
-    // Todo get lastModified
     public Submission getSubmission(String cik) {
-        logger.info("Executing Cacheable {}()", new Object(){}.getClass().getEnclosingMethod().getName());
+        logger.info("Executing {}() {}", new Object(){}.getClass().getEnclosingMethod().getName(), cik);
 
         String url = "https://data.sec.gov/submissions/CIK" + cik + ".json";
 

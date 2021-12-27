@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -27,7 +26,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@EnableCaching
 @EnableScheduling
 @EnableConfigurationProperties
 @EnableJpaRepositories(basePackages = "com.imckify.bakis.repos")
@@ -49,7 +47,7 @@ public class Bakis {
 
 		public void init(FilterConfig filterConfig) {} // not needed
 
-		public void destroy() {} //not needed
+		public void destroy() {} // not needed
 
 		public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 			HttpServletResponse response = (HttpServletResponse) res;
