@@ -18,6 +18,7 @@ public class Submission {
     private List<String> tickers;
     private List<String> exchanges;
     private String fiscalYearEnd;
+    private List<Object> formerNames;
     @JsonIgnore // @JsonIgnoreProperties would ignore only undeclared props
     private List<FilingRecent> filings;
     @JsonIgnore

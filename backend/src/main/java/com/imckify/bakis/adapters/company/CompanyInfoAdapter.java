@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.imckify.bakis.models.Companies;
+import com.imckify.bakis.repos.CompaniesRepo;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -12,6 +14,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +30,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.imckify.bakis.adapters.company.FilingRecent.parseJSON;
 
@@ -36,6 +40,9 @@ public class CompanyInfoAdapter {
     public static final Logger logger = LoggerFactory.getLogger(CompanyInfoAdapter.class);
 
     private Map<String, String> ndx = new HashMap<>();
+
+    @Autowired
+    private CompaniesRepo repo;
 
     @PostConstruct
     private void loadNDX () throws IOException {
@@ -47,23 +54,37 @@ public class CompanyInfoAdapter {
         this.ndx = map;
     }
 
-    @Scheduled(fixedDelay = 1000 * 10)
-    private void getCompanyInfo() {
+//    @Scheduled(fixedDelay = 10 * 1000)
+    @Scheduled(cron = "@weekly")
+    private void updateCompanies() {
         long start = System.currentTimeMillis();
         logger.info("Executing scheduled task {}()", new Object(){}.getClass().getEnclosingMethod().getName());
 
+        List<Companies> companies = repo.findAll();
+
         for (Map.Entry<String, String> e : this.ndx.entrySet()) {
+            // if (!e.getKey().equals("aapl")) continue;
             String cik = e.getValue();
             String cikFormatted = ("0000000000" + cik).substring(cik.length());
 
-            Submission submission = getSubmission(cikFormatted);
+            Submission submission = this.getSubmission(cikFormatted);
 
             ZonedDateTime zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(submission.getLastModified()), ZoneId.of("EST", ZoneId.SHORT_IDS));
             DateTimeFormatter formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss z");
             String dateReadable = zdt.format(formatter2);
 
+            Companies company = companies.stream().filter(c ->
+                    submission.getTickers().contains(c.getTicker()) ||
+                    submission.getFormerNames().contains(c.getName()) ||
+                    submission.getName().equals(c.getName())
+            ).findFirst().orElseGet(Companies::new);
 
-            logger.warn("Received {} company info, lastModified {}", String.format("%4s", submission.getTickers().get(0)), dateReadable); // Todo update database
+            // upsert company
+            company.setTicker(submission.getTickers().get(0));
+            company.setName(submission.getName());
+            this.repo.save(company);
+
+            logger.warn("Updated {} company info, lastModified {}", String.format("%4s", submission.getTickers().get(0)), dateReadable);
         }
         long duration = System.currentTimeMillis() - start;
         logger.info("Executed scheduled task {}() in {}s", new Object(){}.getClass().getEnclosingMethod().getName(), duration/1000);
@@ -94,12 +115,15 @@ public class CompanyInfoAdapter {
                 // mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
                 Submission sub = mapper.readValue(json, Submission.class);
                 sub.setFilings(filings);
-                sub.setLastModified(dateStringToEpochEST(dateString));
+                sub.setLastModified(this.dateStringToEpochEST(dateString));
 
                 if (sub.getTickers().isEmpty()) {
                     String ticker = this.ndx.entrySet().stream().filter(e -> e.getValue().equals(cik)).findFirst().get().getKey();
                     sub.setTickers(Collections.singletonList(ticker.toUpperCase()));
                 }
+
+                List<Object> formerNames = sub.getFormerNames().stream().map(m -> (String) ((LinkedHashMap) m).get("name")).collect(Collectors.toList());
+                sub.setFormerNames(formerNames);
 
                 return sub;
             }
