@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Jackson uses methods that start with get, otherwise class attributes needs @JsonProperty attribute before declaration
+ * Jackson uses methods that start with get prefix, otherwise class attributes need @JsonProperty attribute before
+ * declaration.
  */
 
 @Data
