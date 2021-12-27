@@ -109,6 +109,7 @@ public class FilingAdapter {
                         e -> e.poller(p -> p.trigger(new CronTrigger("0 0/3 6-22 ? * MON-FRI", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(100)) // "0/5 * * ? * *" every 5s
                 )
                 .transform(transformToFiling())
+//                .filter() // Todo
                 .channel("myFeedChannel")
                 .handle(m -> {
                     Filings f = (Filings) m.getPayload();
