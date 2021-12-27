@@ -45,14 +45,6 @@ public class CompanyInfoAdapter {
         System.out.println("==============================================");
     }
 
-    private long dateStringToEpochEST(String dateString) throws ParseException {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        sdf.setTimeZone(TimeZone.getTimeZone("EST"));
-        Date date = sdf.parse(dateString);
-        long epoch = date.toInstant().toEpochMilli();
-        return epoch;
-    }
-
     public Submission getSubmission(String cik) {
         logger.info("Executing {}() {}", new Object(){}.getClass().getEnclosingMethod().getName(), cik);
 
@@ -86,5 +78,13 @@ public class CompanyInfoAdapter {
             e.printStackTrace();
         }
         return new Submission();
+    }
+
+    private long dateStringToEpochEST(String dateString) throws ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        sdf.setTimeZone(TimeZone.getTimeZone("EST"));
+        Date date = sdf.parse(dateString);
+        long epoch = date.toInstant().toEpochMilli();
+        return epoch;
     }
 }
