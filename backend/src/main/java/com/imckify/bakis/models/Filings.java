@@ -34,5 +34,5 @@ public class Filings {
     private String accno;
 
     @Column(name = "CompaniesID")
-    private String companiesID;
+    private Integer companiesID;
 }
