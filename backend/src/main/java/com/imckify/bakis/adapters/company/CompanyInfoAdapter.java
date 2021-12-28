@@ -46,7 +46,7 @@ public class CompanyInfoAdapter {
 
     @PostConstruct
     private void loadNDX () throws IOException {
-        File json = Objects.requireNonNull(Paths.get(System.getProperty("user.dir"), "../data/cik/ndx.json")).toFile();
+        File json = Objects.requireNonNull(Paths.get("/home/asd/IdeaProjects/Bakalauras/data/cik/ndx.json")).toFile();
 
         ObjectMapper mapper = new ObjectMapper();
 

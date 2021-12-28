@@ -71,8 +71,7 @@ public class Bakis {
 	@Bean
 	public MetadataStore metadataStore() {
 		PropertiesPersistingMetadataStore metadataStore = new PropertiesPersistingMetadataStore();
-		String path = Objects.requireNonNull(this.getClass().getClassLoader().getResource("application.properties/..")).getPath();
-		metadataStore.setBaseDirectory(path + "temp");
+		metadataStore.setBaseDirectory("/home/asd/IdeaProjects/Bakalauras/backend/src/main/resources/" + "temp");
 		return metadataStore;
 	}
 
