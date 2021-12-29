@@ -30,12 +30,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.*;
 import org.springframework.integration.transformer.AbstractPayloadTransformer;
+import org.springframework.messaging.Message;
 import org.springframework.scheduling.support.CronTrigger;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,6 +94,8 @@ public class FilingAdapter {
                 filing.setRef(link);
                 filing.setCik(cik);
                 filing.setAccno(acc);
+                filing.setMessageGroupID(entry.getComments().split(",")[0]);
+                filing.setMessageGroupComplete(Boolean.parseBoolean(entry.getComments().split(",")[1]));
                 return filing;
             }
         };
@@ -106,23 +106,39 @@ public class FilingAdapter {
     public IntegrationFlow filingFlow() {
         return IntegrationFlows
                 .from(new MultiFeedEntryMessageSource(propsConfig.getFeeds(), "myKey"),
-                        e -> e.poller(p -> p.trigger(new CronTrigger("0 0/3 6-22 ? * MON-FRI", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(100)) // "0/5 * * ? * *" every 5s
+                        e -> e.poller(p -> p.trigger(new CronTrigger("0 0/3 6-22 ? * MON-FRI", TimeZone.getTimeZone("EST"))).maxMessagesPerPoll(100))
                 )
                 .transform(transformToFiling())
-//                .filter() // Todo
                 .channel("myFeedChannel")
+                .aggregate(a -> a
+                        .correlationStrategy(m -> ((Filings) m.getPayload()).getMessageGroupID())
+                        .releaseStrategy(g -> {
+                            List<Message<?>> messages = new ArrayList<>(g.getMessages());
+                            Filings last = (Filings) messages.get(messages.size() - 1).getPayload();
+                            return last.isMessageGroupComplete();
+                        })
+                )
                 .handle(m -> {
-                    Filings f = (Filings) m.getPayload();
-                    String filingName = f.getName();
-                    String companyName = filingName.substring(0, filingName.indexOf(" ("));
+                    List<Companies> companies = this.CompaniesRepo.findAll();
+                    List<Filings> filings = new ArrayList<>();
 
-                    // finds Companies for each entry // Todo bottleneck
-                    Optional<List<Companies>> companies = this.CompaniesRepo.findByName(companyName);
-                    if (companies.isPresent() && companies.get().size() > 0) {
-                        int companyID = companies.get().get(0).getID();
-                        f.setCompaniesID(companyID);
-                        this.FilingsRepo.save(f);
-                        logger.warn("Saved filing: {}, {}, companiesID={}", f.getDate(), companyName, companyID);
+                    for (Object e : (List) m.getPayload()){
+                        Filings f = (Filings) e;
+                        String filingName = f.getName();
+                        String companyName = filingName.substring(0, filingName.indexOf(" ("));
+
+                        // finds Companies for each entry
+                        Optional<Companies> company = companies.stream().filter(c -> c.getName().equals(companyName)).findFirst();
+                        if (company.isPresent()) {
+                            int companyID = company.get().getID();
+                            f.setCompaniesID(companyID);
+                            filings.add(f);
+                        }
+                    }
+
+                    if (!filings.isEmpty()) {
+                        this.FilingsRepo.saveAll(filings);
+                        logger.info("Saved {} filings", filings.size());
                     }
                 })
                 .get();

@@ -33,6 +33,12 @@ public class Filings {
     @Column(name = "accno")
     private String accno;
 
+    @Transient
+    private String messageGroupID;
+
+    @Transient
+    private boolean isMessageGroupComplete;
+
     @Column(name = "CompaniesID")
     private Integer companiesID;
 }

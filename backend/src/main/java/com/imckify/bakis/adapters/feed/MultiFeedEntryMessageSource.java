@@ -160,6 +160,7 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
     }
 
     private void populateEntryList() {
+        String uuid = UUID.randomUUID().toString();
         Map<URL, SyndFeed> syndFeeds = this.getFeeds();
         List<AbstractMap.SimpleEntry<URL,SyndEntry>> newEntries = new ArrayList<>();
         for (URL url : syndFeeds.keySet()) {
@@ -170,6 +171,7 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
                     boolean withinNewEntries = false;
                     retrievedEntries.sort(new SyndEntryPublishedDateComparator()); // ascending dates
                     for (SyndEntry entry : retrievedEntries) {
+                        entry.setComments(uuid + ',' + false);
                         Date entryDate = getLastModifiedDate(entry);
                         long lastTime = this.lastTimes.get(url);
                         if ((entryDate != null && entryDate.getTime() > lastTime) // only latest
@@ -185,6 +187,12 @@ public class MultiFeedEntryMessageSource extends AbstractMessageSource<SyndEntry
 
         // ungrouping entries from feed blocks (mixing feeds)
         newEntries = newEntries.stream().sorted((e1, e2) -> new SyndEntryPublishedDateComparator().compare(e1.getValue(), e2.getValue())).collect(Collectors.toList());
+
+        // for aggregator
+        if (!newEntries.isEmpty()) {
+            SyndEntry last = newEntries.get(newEntries.size() - 1).getValue();
+            last.setComments(uuid + ',' + true);
+        }
 
         // newEntries must be sorted in ascending order, so each poll from FIFO queue will increase this.lastTimes
         this.entries.addAll(newEntries);
