@@ -1,0 +1,29 @@
+name: update submodule@SHA objects
+
+on:
+  workflow_dispatch:
+
+jobs:
+  updateSubmodulesJob:
+    runs-on: ubuntu-18.04
+
+    steps:
+      - name: Checkout Bakalauras repo
+        uses: actions/checkout@v2
+        with: 
+          repository: iMckify/Bakalauras
+          token: ${{ secrets.BAKALAURAS_TOKEN_GITHUB }}
+          submodules: 'true'
+      - name: updating submodules SHA
+        run: |
+          git config --global user.email "rokas.mockevicius@gmail.com"
+          git config --global user.name "imckify"
+          git rev-parse main
+          cd GUI
+          git checkout master && git pull
+          cd ..
+          cd Scraper
+          git checkout master && git pull
+          cd ..
+          git commit -a -m 'github action updated submodule gitlink' || echo "gitlink not updated"
+          git push
