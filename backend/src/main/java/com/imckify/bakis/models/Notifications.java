@@ -24,6 +24,9 @@ public class Notifications {
     @Column(name = "period")
     private String period;
 
+    @Column(name = "seen")
+    private Boolean seen;
+
     @Column(name = "InvestorsID")
     private Integer investorsID;
 }

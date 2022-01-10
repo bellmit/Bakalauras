@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface CompaniesRepo extends JpaRepository<Companies, Integer> {
     Optional<List<Companies>> findByName(String name);
+    Optional<List<Companies>> findByTickerIn(List<String> tickerList);
 }

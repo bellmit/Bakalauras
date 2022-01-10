@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface NotificationsRepo extends JpaRepository<Notifications, Integer> {
-    Optional<List<Notifications>> findByInvestorsID(Integer id);
-
+    Optional<List<Notifications>> findByInvestorsIDAndSeenIsNull(Integer id);
+    Optional<List<Notifications>> findByInvestorsIDAndSeenIsNotNull(Integer id);
 }

@@ -1,7 +1,11 @@
 package com.imckify.bakis.controllers;
 
 import com.imckify.bakis.Bakis.ResourceNotFoundException;
+import com.imckify.bakis.models.Companies;
+import com.imckify.bakis.models.Filings;
 import com.imckify.bakis.models.Notifications;
+import com.imckify.bakis.repos.CompaniesRepo;
+import com.imckify.bakis.repos.FilingsRepo;
 import com.imckify.bakis.repos.NotificationsRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,8 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/Notifications")
@@ -18,6 +27,12 @@ public class NotificationsControl {
 
     @Autowired
     private NotificationsRepo NotificationsRepo;
+
+    @Autowired
+    private FilingsRepo FilingsRepo;
+
+    @Autowired
+    private CompaniesRepo CompaniesRepo;
 
     public static final Logger logger = LoggerFactory.getLogger(NotificationsControl.class);
 
@@ -30,9 +45,52 @@ public class NotificationsControl {
 
     @GetMapping("/investor/{id}")
     public ResponseEntity<List<Notifications>> getInvestorNotifications(@PathVariable(value = "id") int id){
-        Optional<List<Notifications>> Notifications = this.NotificationsRepo.findByInvestorsID(id);
+        Optional<List<Notifications>> Notifications = this.NotificationsRepo.findByInvestorsIDAndSeenIsNull(id);
 
         return Notifications.map(notifications -> ResponseEntity.ok().body(notifications)).orElseGet(() -> ResponseEntity.ok().build());
+    }
+
+    @GetMapping("/investor/{id}/produce")
+    public List<Notifications> produceInvestorNotifications(@PathVariable(value = "id") int id){
+        // all controls for notifications
+        List<Notifications> subscriptions = this.NotificationsRepo.findByInvestorsIDAndSeenIsNull(id).get();
+
+        List<String> tickerList = subscriptions.stream().map(Notifications::getName).collect(Collectors.toList());
+        List<Companies> companies = this.CompaniesRepo.findByTickerIn(tickerList).get();
+
+        List<Integer> companyIDs = companies.stream().map(Companies::getID).collect(Collectors.toList());
+        List<String> typeList = subscriptions.stream().map(Notifications::getType).distinct().collect(Collectors.toList());
+        List<Filings> notificationFilings = this.FilingsRepo.findByCompaniesIDInAndFormIn(companyIDs, typeList).get();
+
+        // map notifications from filings
+        List<Notifications> real = this.NotificationsRepo.findByInvestorsIDAndSeenIsNotNull(id).get();
+        List<Notifications> mapped = notificationFilings.stream().map(f -> {
+            Notifications n = new Notifications();
+            n.setName(companies.stream().filter(c -> c.getID().equals(f.getCompaniesID())).findFirst().map(Companies::getTicker).get());
+            n.setType(f.getForm());
+            n.setPeriod(f.getDate());
+            n.setSeen(false);
+            n.setInvestorsID(id);
+            return n;
+        }).collect(Collectors.toList());
+
+        // save new notifications
+        List<Notifications> news = mapped.stream().filter(n -> {
+            Notifications control = subscriptions.stream().filter(s -> s.getName().equals(n.getName()) && s.getType().equals(n.getType())).findFirst().get();
+            return control.getInvestorsID().equals(n.getInvestorsID()) &&
+                    (d(n.getPeriod()).isBefore(d(control.getPeriod())) || n.getPeriod().equals(control.getPeriod())) &&
+                    control.getName().equals(n.getName()) &&
+                    control.getType().equals(n.getType());
+        }).collect(Collectors.toList());
+
+        return this.NotificationsRepo.saveAll(news);
+    }
+
+    @GetMapping("/investor/{id}/SeenNotNull")
+    public ResponseEntity<List<Notifications>> loadInvestorNotifications(@PathVariable(value = "id") int id){
+        Optional<List<Notifications>> realNotifications = this.NotificationsRepo.findByInvestorsIDAndSeenIsNotNull(id);
+        realNotifications.get().stream().collect(Collectors.groupingBy(n -> n.getName()));
+        return realNotifications.map(notifications -> ResponseEntity.ok().body(notifications)).orElseGet(() -> ResponseEntity.ok().build());
     }
 
     @GetMapping("/{id}")
@@ -76,5 +134,8 @@ public class NotificationsControl {
                 });
     }
 
+    private LocalDate d(String dateString) {
+        return LocalDate.parse(dateString);
+    }
 }
 
