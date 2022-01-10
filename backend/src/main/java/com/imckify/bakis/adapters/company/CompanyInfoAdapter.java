@@ -60,7 +60,7 @@ public class CompanyInfoAdapter {
         long start = System.currentTimeMillis();
         logger.info("Executing scheduled task {}()", new Object(){}.getClass().getEnclosingMethod().getName());
 
-        List<Companies> companies = repo.findAll();
+        List<Companies> companies = this.repo.findAll();
 
         for (Map.Entry<String, String> e : this.ndx.entrySet()) {
             // if (!e.getKey().equals("aapl")) continue;
