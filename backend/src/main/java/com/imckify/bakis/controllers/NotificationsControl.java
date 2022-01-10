@@ -14,11 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RestController
@@ -43,6 +40,7 @@ public class NotificationsControl {
         );
     }
 
+    // get notifications' subscriptions (controls)
     @GetMapping("/investor/{id}")
     public ResponseEntity<List<Notifications>> getInvestorNotifications(@PathVariable(value = "id") int id){
         Optional<List<Notifications>> Notifications = this.NotificationsRepo.findByInvestorsIDAndSeenIsNull(id);
@@ -50,20 +48,22 @@ public class NotificationsControl {
         return Notifications.map(notifications -> ResponseEntity.ok().body(notifications)).orElseGet(() -> ResponseEntity.ok().build());
     }
 
+    // produce filings notifications for subscriptions (controls)
     @GetMapping("/investor/{id}/produce")
     public List<Notifications> produceInvestorNotifications(@PathVariable(value = "id") int id){
-        // all controls for notifications
+        // all notification controls
         List<Notifications> subscriptions = this.NotificationsRepo.findByInvestorsIDAndSeenIsNull(id).get();
 
+        // tickers -> companyIDs
         List<String> tickerList = subscriptions.stream().map(Notifications::getName).collect(Collectors.toList());
         List<Companies> companies = this.CompaniesRepo.findByTickerIn(tickerList).get();
-
         List<Integer> companyIDs = companies.stream().map(Companies::getID).collect(Collectors.toList());
+
+        // get prepare filings for mapping
         List<String> typeList = subscriptions.stream().map(Notifications::getType).distinct().collect(Collectors.toList());
         List<Filings> notificationFilings = this.FilingsRepo.findByCompaniesIDInAndFormIn(companyIDs, typeList).get();
 
-        // map notifications from filings
-        List<Notifications> real = this.NotificationsRepo.findByInvestorsIDAndSeenIsNotNull(id).get();
+        // map filings to notifications
         List<Notifications> mapped = notificationFilings.stream().map(f -> {
             Notifications n = new Notifications();
             n.setName(companies.stream().filter(c -> c.getID().equals(f.getCompaniesID())).findFirst().map(Companies::getTicker).get());
@@ -74,22 +74,31 @@ public class NotificationsControl {
             return n;
         }).collect(Collectors.toList());
 
-        // save new notifications
-        List<Notifications> news = mapped.stream().filter(n -> {
-            Notifications control = subscriptions.stream().filter(s -> s.getName().equals(n.getName()) && s.getType().equals(n.getType())).findFirst().get();
-            return control.getInvestorsID().equals(n.getInvestorsID()) &&
-                    (d(n.getPeriod()).isBefore(d(control.getPeriod())) || n.getPeriod().equals(control.getPeriod())) &&
-                    control.getName().equals(n.getName()) &&
-                    control.getType().equals(n.getType());
-        }).collect(Collectors.toList());
+        // get subscribing control for each notification and check notification date with control date
+        List<Notifications> news = mapped.stream().filter(n ->
+                subscriptions.stream().filter(s ->
+                        // get control
+                        s.getName().equals(n.getName()) &&
+                                s.getType().equals(n.getType()) &&
+                                s.getInvestorsID().equals(n.getInvestorsID())
+                )
+                        .findFirst()
+                        // validate period <= subscribed period
+                        .filter(op_n -> (d(n.getPeriod()).isBefore(d(op_n.getPeriod())) || n.getPeriod().equals(op_n.getPeriod())))
+                        .isPresent()
+        ).collect(Collectors.toList());
+
+        // due to Hibernate entity state, saveAll does not check if row already exists
+        List<Notifications> existing = this.NotificationsRepo.findByInvestorsIDAndSeenIsNotNull(id).get();
+        news = news.stream().filter(n -> !existing.contains(n)).collect(Collectors.toList());
 
         return this.NotificationsRepo.saveAll(news);
     }
 
-    @GetMapping("/investor/{id}/SeenNotNull")
-    public ResponseEntity<List<Notifications>> loadInvestorNotifications(@PathVariable(value = "id") int id){
+    // get notifications which have been produced using subscriptions (controls)
+    @GetMapping("/investor/{id}/receive")
+    public ResponseEntity<List<Notifications>> receiveInvestorNotifications(@PathVariable(value = "id") int id){
         Optional<List<Notifications>> realNotifications = this.NotificationsRepo.findByInvestorsIDAndSeenIsNotNull(id);
-        realNotifications.get().stream().collect(Collectors.groupingBy(n -> n.getName()));
         return realNotifications.map(notifications -> ResponseEntity.ok().body(notifications)).orElseGet(() -> ResponseEntity.ok().build());
     }
 
