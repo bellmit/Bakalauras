@@ -1,0 +1,12 @@
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### data ###
+data/*
+#### except
+!data/cik
+!data/tickers
+
