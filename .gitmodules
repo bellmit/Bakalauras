@@ -9,3 +9,6 @@
 	url = https://github.com/iMckify/Scraper
 	branch = master
 	update = rebase
+[submodule "EdgarRssReader"]
+	path = EdgarRssReader
+	url = https://github.com/iMckify/EdgarRssReader.git
