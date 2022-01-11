@@ -10,3 +10,6 @@
 	branch = master
 	update = rebase
 
+[submodule "EdgarRssReader"]
+	path = EdgarRssReader
+	url = git@github.com:iMckify/EdgarRssReader.git
