@@ -49,7 +49,7 @@ public class NotificationsControl {
     }
 
     // produce filings notifications for subscriptions (controls)
-    @GetMapping("/investor/{id}/produce")
+    @GetMapping("/produce/investor/{id}")
     public List<Notifications> produceInvestorNotifications(@PathVariable(value = "id") int id){
         // all notification controls
         List<Notifications> subscriptions = this.NotificationsRepo.findByInvestorsIDAndSeenIsNull(id).get();
@@ -96,7 +96,7 @@ public class NotificationsControl {
     }
 
     // get notifications which have been produced using subscriptions (controls)
-    @GetMapping("/investor/{id}/receive")
+    @GetMapping("/receive/investor/{id}")
     public ResponseEntity<List<Notifications>> receiveInvestorNotifications(@PathVariable(value = "id") int id){
         Optional<List<Notifications>> realNotifications = this.NotificationsRepo.findByInvestorsIDAndSeenIsNotNull(id);
         return realNotifications.map(notifications -> ResponseEntity.ok().body(notifications)).orElseGet(() -> ResponseEntity.ok().build());
