@@ -102,6 +102,17 @@ public class NotificationsControl {
         return realNotifications.map(notifications -> ResponseEntity.ok().body(notifications)).orElseGet(() -> ResponseEntity.ok().build());
     }
 
+    // mark notification as read
+    @GetMapping("/mark/{id}")
+    public Notifications markNotification(@PathVariable(value = "id") int id){
+        return this.NotificationsRepo.findById(id)
+                .map(Notification -> {
+                    Notification.setSeen(true);
+                    return this.NotificationsRepo.save(Notification);
+                })
+                .orElseThrow(()-> new ResourceNotFoundException("Notification not found "+id));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Notifications> getNotifications(@PathVariable(value = "id") int id){
         Notifications Notification = this.NotificationsRepo.findById(id).orElseThrow(
