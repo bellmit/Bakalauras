@@ -69,7 +69,7 @@ public class NotificationsControl {
             n.setName(companies.stream().filter(c -> c.getID().equals(f.getCompaniesID())).findFirst().map(Companies::getTicker).get());
             n.setType(f.getForm());
             n.setPeriod(f.getDate());
-            n.setSeen(false);
+            n.setSeen(false); // ignored in !existing.contains(n), seen is not used in equals
             n.setInvestorsID(id);
             return n;
         }).collect(Collectors.toList());
