@@ -17,19 +17,13 @@ public class ReportsControl {
     private ReportsRepo ReportsRepo;
 
     @GetMapping("")
-    public ResponseEntity<List<Reports>> getReports() {
-        return ResponseEntity.ok(
-                this.ReportsRepo.findAll()
-        );
+    public List<Reports> getReports() {
+        return this.ReportsRepo.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Reports> getReports(@PathVariable(value = "id") int id){
-        Reports Report = this.ReportsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Report not found")
-        );
-
-        return  ResponseEntity.ok().body(Report);
+    public Reports getReports(@PathVariable(value = "id") int id){
+        return this.ReportsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Report not found"));
     }
 
     @PostMapping("/create")
@@ -39,9 +33,7 @@ public class ReportsControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteReport(@PathVariable(value = "id") int id){
-        Reports Report =this.ReportsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Report not found "+id)
-        );
+        Reports Report = this.ReportsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Report not found "+id));
 
         this.ReportsRepo.delete(Report);
         return ResponseEntity.ok().build();

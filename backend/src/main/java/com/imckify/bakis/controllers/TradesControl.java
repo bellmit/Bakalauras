@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,26 +19,20 @@ public class TradesControl {
     private TradesRepo TradesRepo;
 
 //    @GetMapping("")       // NEREIKALINGAS
-//    public ResponseEntity<List<Trades>> getTrades() {
-//        return ResponseEntity.ok(
-//                this.TradesRepo.findAll()
-//        );
+//    public List<Trades> getTrades() {
+//        return this.TradesRepo.findAll();
 //    }
 
     @GetMapping("/investor/{id}")
-    public ResponseEntity<List<Trades>> getInvestorTrades(@PathVariable(value = "id") int id){
+    public List<Trades> getInvestorTrades(@PathVariable(value = "id") int id){
         Optional<List<Trades>> Trades = this.TradesRepo.findByInvestorsID(id);
 
-        return Trades.map(trades -> ResponseEntity.ok().body(trades)).orElseGet(() -> ResponseEntity.ok().build());
+        return Trades.orElseGet(ArrayList::new);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Trades> getTrades(@PathVariable(value = "id") int id){
-        Trades Trade = this.TradesRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Trade not found")
-        );
-
-        return  ResponseEntity.ok().body(Trade);
+    public Trades getTrades(@PathVariable(value = "id") int id){
+        return this.TradesRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Trade not found"));
     }
 
     @PostMapping("/create")
@@ -47,9 +42,7 @@ public class TradesControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteTrade(@PathVariable(value = "id") int id){
-        Trades Trade =this.TradesRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Trade not found "+id)
-        );
+        Trades Trade = this.TradesRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Trade not found "+id));
 
         this.TradesRepo.delete(Trade);
         return ResponseEntity.ok().build();

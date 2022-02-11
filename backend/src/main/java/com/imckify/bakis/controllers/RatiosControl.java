@@ -17,19 +17,13 @@ public class RatiosControl {
     private RatiosRepo RatiosRepo;
 
     @GetMapping("")
-    public ResponseEntity<List<Ratios>> getRatios() {
-        return ResponseEntity.ok(
-                this.RatiosRepo.findAll()
-        );
+    public List<Ratios> getRatios() {
+        return this.RatiosRepo.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ratios> getRatios(@PathVariable(value = "id") int id){
-        Ratios Ratio = this.RatiosRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Ratio not found")
-        );
-
-        return  ResponseEntity.ok().body(Ratio);
+    public Ratios getRatios(@PathVariable(value = "id") int id){
+        return this.RatiosRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Ratio not found"));
     }
 
     @PostMapping("/create")
@@ -39,9 +33,7 @@ public class RatiosControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteRatio(@PathVariable(value = "id") int id){
-        Ratios Ratio =this.RatiosRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Ratio not found "+id)
-        );
+        Ratios Ratio = this.RatiosRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Ratio not found "+id));
 
         this.RatiosRepo.delete(Ratio);
         return ResponseEntity.ok().build();

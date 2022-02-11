@@ -17,19 +17,13 @@ public class ModificationsControl {
     private ModificationsRepo ModificationsRepo;
 
     @GetMapping("")
-    public ResponseEntity<List<Modifications>> getModifications() {
-        return ResponseEntity.ok(
-                this.ModificationsRepo.findAll()
-        );
+    public List<Modifications> getModifications() {
+        return this.ModificationsRepo.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Modifications> getModifications(@PathVariable(value = "id") int id){
-        Modifications Modification = this.ModificationsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Modification not found")
-        );
-
-        return  ResponseEntity.ok().body(Modification);
+    public Modifications getModifications(@PathVariable(value = "id") int id){
+        return this.ModificationsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Modification not found"));
     }
 
     @PostMapping("/create")
@@ -39,9 +33,7 @@ public class ModificationsControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteModification(@PathVariable(value = "id") int id){
-        Modifications Modification =this.ModificationsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Modification not found "+id)
-        );
+        Modifications Modification = this.ModificationsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Modification not found "+id));
 
         this.ModificationsRepo.delete(Modification);
         return ResponseEntity.ok().build();

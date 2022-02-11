@@ -17,19 +17,13 @@ public class FilingsControl {
     private FilingsRepo FilingsRepo;
 
     @GetMapping("")
-    public ResponseEntity<List<Filings>> getFilings() {
-        return ResponseEntity.ok(
-                this.FilingsRepo.findAll()
-        );
+    public List<Filings> getFilings() {
+        return this.FilingsRepo.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Filings> getFilings(@PathVariable(value = "id") int id){
-        Filings Filing = this.FilingsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Filing not found")
-        );
-
-        return  ResponseEntity.ok().body(Filing);
+    public Filings getFilings(@PathVariable(value = "id") int id){
+        return this.FilingsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Filing not found"));
     }
 
     @PostMapping("/create")
@@ -39,9 +33,7 @@ public class FilingsControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteFiling(@PathVariable(value = "id") int id){
-        Filings Filing =this.FilingsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Filing not found "+id)
-        );
+        Filings Filing = this.FilingsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Filing not found "+id));
 
         this.FilingsRepo.delete(Filing);
         return ResponseEntity.ok().build();

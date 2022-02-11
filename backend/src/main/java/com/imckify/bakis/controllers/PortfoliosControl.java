@@ -17,19 +17,13 @@ public class PortfoliosControl {
     private PortfoliosRepo PortfoliosRepo;
 
     @GetMapping("")
-    public ResponseEntity<List<Portfolios>> getPortfolios() {
-        return ResponseEntity.ok(
-                this.PortfoliosRepo.findAll()
-        );
+    public List<Portfolios> getPortfolios() {
+        return this.PortfoliosRepo.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Portfolios> getPortfolios(@PathVariable(value = "id") int id){
-        Portfolios Portfolio = this.PortfoliosRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Portfolio not found")
-        );
-
-        return  ResponseEntity.ok().body(Portfolio);
+    public Portfolios getPortfolios(@PathVariable(value = "id") int id){
+        return this.PortfoliosRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Portfolio not found"));
     }
 
     @PostMapping("/create")
@@ -39,9 +33,7 @@ public class PortfoliosControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deletePortfolio(@PathVariable(value = "id") int id){
-        Portfolios Portfolio =this.PortfoliosRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Portfolio not found "+id)
-        );
+        Portfolios Portfolio = this.PortfoliosRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Portfolio not found "+id));
 
         this.PortfoliosRepo.delete(Portfolio);
         return ResponseEntity.ok().build();

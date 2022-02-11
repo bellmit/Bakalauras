@@ -17,19 +17,13 @@ public class WatchlistsControl {
     private WatchlistsRepo WatchlistsRepo;
 
     @GetMapping("")
-    public ResponseEntity<List<Watchlists>> getWatchlists() {
-        return ResponseEntity.ok(
-                this.WatchlistsRepo.findAll()
-        );
+    public List<Watchlists> getWatchlists() {
+        return this.WatchlistsRepo.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Watchlists> getWatchlists(@PathVariable(value = "id") int id){
-        Watchlists Watchlist = this.WatchlistsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Watchlist not found")
-        );
-
-        return  ResponseEntity.ok().body(Watchlist);
+    public Watchlists getWatchlists(@PathVariable(value = "id") int id){
+        return this.WatchlistsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found"));
     }
 
     @PostMapping("/create")
@@ -39,9 +33,7 @@ public class WatchlistsControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "id") int id){
-        Watchlists Watchlist =this.WatchlistsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Watchlist not found "+id)
-        );
+        Watchlists Watchlist = this.WatchlistsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found "+id));
 
         this.WatchlistsRepo.delete(Watchlist);
         return ResponseEntity.ok().build();

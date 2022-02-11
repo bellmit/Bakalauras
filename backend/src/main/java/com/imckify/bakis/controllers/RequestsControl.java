@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,33 +19,27 @@ public class RequestsControl {
     private RequestsRepo RequestsRepo;
 
     @GetMapping("")
-    public ResponseEntity<List<Requests>> getRequests() {
-        return ResponseEntity.ok(
-                this.RequestsRepo.findAll()
-        );
+    public List<Requests> getRequests() {
+        return this.RequestsRepo.findAll();
     }
 
     @GetMapping("/unapproved")
-    public ResponseEntity<List<Requests>> getUnapprovedRequests() {
+    public List<Requests> getUnapprovedRequests() {
         Optional<List<Requests>> Requests = this.RequestsRepo.findByAnalystsIDIsNull();
 
-        return Requests.map(requests -> ResponseEntity.ok().body(requests)).orElseGet(() -> ResponseEntity.ok().build());
+        return Requests.orElseGet(ArrayList::new);
     }
 
     @GetMapping("/investor/{id}")
-    public ResponseEntity<List<Requests>> getInvestorRequests(@PathVariable(value = "id") int id){
+    public List<Requests> getInvestorRequests(@PathVariable(value = "id") int id){
         Optional<List<Requests>> Requests = this.RequestsRepo.findByInvestorsID(id);
 
-        return Requests.map(requests -> ResponseEntity.ok().body(requests)).orElseGet(() -> ResponseEntity.ok().build());
+        return Requests.orElseGet(ArrayList::new);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Requests> getRequests(@PathVariable(value = "id") int id){
-        Requests Request = this.RequestsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Request not found")
-        );
-
-        return  ResponseEntity.ok().body(Request);
+    public Requests getRequests(@PathVariable(value = "id") int id){
+        return this.RequestsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Request not found"));
     }
 
     @PostMapping("/create")
@@ -54,9 +49,7 @@ public class RequestsControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteRequest(@PathVariable(value = "id") int id){
-        Requests Request =this.RequestsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Request not found "+id)
-        );
+        Requests Request = this.RequestsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Request not found "+id));
 
         this.RequestsRepo.delete(Request);
         return ResponseEntity.ok().build();

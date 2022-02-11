@@ -17,19 +17,13 @@ public class CompaniesControl {
     private CompaniesRepo CompaniesRepo;
 
     @GetMapping("")
-    public ResponseEntity<List<Companies>> getCompanies() {
-        return ResponseEntity.ok(
-                this.CompaniesRepo.findAll()
-        );
+    public List<Companies> getCompanies() {
+        return this.CompaniesRepo.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Companies> getCompanies(@PathVariable(value = "id") int id){
-        Companies Company = this.CompaniesRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Company not found")
-        );
-
-        return  ResponseEntity.ok().body(Company);
+    public Companies getCompanies(@PathVariable(value = "id") int id){
+        return this.CompaniesRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Company not found"));
     }
 
     @PostMapping("/create")
@@ -39,9 +33,7 @@ public class CompaniesControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteCompany(@PathVariable(value = "id") int id){
-        Companies Company =this.CompaniesRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Company not found "+id)
-        );
+        Companies Company = this.CompaniesRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Company not found "+id));
 
         this.CompaniesRepo.delete(Company);
         return ResponseEntity.ok().build();

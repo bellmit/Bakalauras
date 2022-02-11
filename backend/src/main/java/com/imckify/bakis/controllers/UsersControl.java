@@ -62,10 +62,8 @@ public class UsersControl {
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<String> getUserByUsername(@PathVariable(value = "username") String username) throws JsonProcessingException {
-        Users User = this.UsersRepo.findByUsername(username).orElseThrow(
-                ()-> new ResourceNotFoundException("User not found")
-        );
+    public String getUserByUsername(@PathVariable(value = "username") String username) throws JsonProcessingException {
+        Users User = this.UsersRepo.findByUsername(username).orElseThrow(()-> new ResourceNotFoundException("User not found"));
         
         // remove password from store
         Map<String, Object> map = new HashMap<>();
@@ -77,24 +75,18 @@ public class UsersControl {
 
         String jsonResult = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(map);
 
-        return  ResponseEntity.ok().body(jsonResult);
+        return jsonResult;
     }
     //<<<<<<<<<<<<<<<<      Login
 
     @GetMapping("")
-    public ResponseEntity<List<Users>> getUsers() {
-        return ResponseEntity.ok(
-                this.UsersRepo.findAll()
-        );
+    public List<Users> getUsers() {
+        return this.UsersRepo.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Users> getUsers(@PathVariable(value = "id") int id){
-        Users User = this.UsersRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("User not found")
-        );
-
-        return  ResponseEntity.ok().body(User);
+    public Users getUsers(@PathVariable(value = "id") int id){
+        return this.UsersRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("User not found"));
     }
 
     @PostMapping("/create")
@@ -108,9 +100,7 @@ public class UsersControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable(value = "id") int id){
-        Users User =this.UsersRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("User not found "+id)
-        );
+        Users User = this.UsersRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("User not found "+id));
 
         this.UsersRepo.delete(User);
         return ResponseEntity.ok().build();

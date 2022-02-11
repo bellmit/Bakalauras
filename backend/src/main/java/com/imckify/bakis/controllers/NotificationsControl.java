@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -34,18 +35,16 @@ public class NotificationsControl {
     public static final Logger logger = LoggerFactory.getLogger(NotificationsControl.class);
 
     @GetMapping("")
-    public ResponseEntity<List<Notifications>> getNotifications() {
-        return ResponseEntity.ok(
-                this.NotificationsRepo.findAll()
-        );
+    public List<Notifications> getNotifications() {
+        return this.NotificationsRepo.findAll();
     }
 
     // get notifications' subscriptions (controls)
     @GetMapping("/investor/{id}")
-    public ResponseEntity<List<Notifications>> getInvestorNotifications(@PathVariable(value = "id") int id){
+    public List<Notifications> getInvestorNotifications(@PathVariable(value = "id") int id){
         Optional<List<Notifications>> Notifications = this.NotificationsRepo.findByInvestorsIDAndSeenIsNull(id);
 
-        return Notifications.map(notifications -> ResponseEntity.ok().body(notifications)).orElseGet(() -> ResponseEntity.ok().build());
+        return Notifications.orElseGet(ArrayList::new);
     }
 
     // produce filings notifications for subscriptions (controls)
@@ -97,9 +96,9 @@ public class NotificationsControl {
 
     // get notifications which have been produced using subscriptions (controls)
     @GetMapping("/receive/investor/{id}")
-    public ResponseEntity<List<Notifications>> receiveInvestorNotifications(@PathVariable(value = "id") int id){
+    public List<Notifications> receiveInvestorNotifications(@PathVariable(value = "id") int id){
         Optional<List<Notifications>> realNotifications = this.NotificationsRepo.findByInvestorsIDAndSeenIsNotNull(id);
-        return realNotifications.map(notifications -> ResponseEntity.ok().body(notifications)).orElseGet(() -> ResponseEntity.ok().build());
+        return realNotifications.orElseGet(ArrayList::new);
     }
 
     // mark notification as read
@@ -114,12 +113,8 @@ public class NotificationsControl {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Notifications> getNotifications(@PathVariable(value = "id") int id){
-        Notifications Notification = this.NotificationsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Notification not found")
-        );
-
-        return  ResponseEntity.ok().body(Notification);
+    public Notifications getNotifications(@PathVariable(value = "id") int id){
+        return this.NotificationsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Notification not found"));
     }
 
     @PostMapping("/create")
@@ -129,9 +124,7 @@ public class NotificationsControl {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteNotification(@PathVariable(value = "id") int id){
-        Notifications Notification =this.NotificationsRepo.findById(id).orElseThrow(
-                ()-> new ResourceNotFoundException("Notification not found "+id)
-        );
+        Notifications Notification = this.NotificationsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Notification not found "+id));
 
         this.NotificationsRepo.delete(Notification);
         return ResponseEntity.ok().build();
