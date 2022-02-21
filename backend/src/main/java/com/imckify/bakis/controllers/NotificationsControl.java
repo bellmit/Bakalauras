@@ -102,7 +102,7 @@ public class NotificationsControl {
     }
 
     // mark notification as read
-    @GetMapping("/mark/{id}")
+    @PostMapping("/mark/{id}")
     public Notifications markNotification(@PathVariable(value = "id") int id){
         return this.NotificationsRepo.findById(id)
                 .map(Notification -> {
