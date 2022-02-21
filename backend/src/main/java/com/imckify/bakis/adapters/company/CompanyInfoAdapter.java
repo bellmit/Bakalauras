@@ -80,9 +80,9 @@ public class CompanyInfoAdapter {
             ).findFirst().orElseGet(Companies::new);
 
             // upsert company
-            company.setTicker(submission.getTickers().get(0));
             company.setName(submission.getName());
-            this.repo.save(company);
+//            company.setTicker(submission.getTickers().get(0)); // Todo update ticker in all db tables' rows
+            this.repo.save(company); // Todo extract other submission info for company, like sic, name, fiscalYearEnd
 
             logger.warn("Updated {} company info, lastModified {}", String.format("%4s", submission.getTickers().get(0)), dateReadable);
         }

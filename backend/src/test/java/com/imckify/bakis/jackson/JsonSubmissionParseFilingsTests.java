@@ -77,13 +77,9 @@ public class JsonSubmissionParseFilingsTests {
         JsonNode node = root.get("filings").get("recent");
 
 
-        // Todo i need latest 10-K. if there was one, update company info. Save last 10-K date like in db!!!!!
-        // Todo use JsonSubmissionParseFilingsTests.java
-
         List<FilingRecent> filings = parseJSON(node.toString());
         System.out.println(filings);
 
-//          Todo extract other info from root, like sic, name, fiscalYearEnd
 //        ObjectReader arrayReader = mapper.readerFor(String[].class); //String[].class // new TypeReference<String[]>(){}
 //        List<String> accList = Arrays.asList(arrayReader.readValue(node.get("accessionNumber")));
 //        RecentFilings result = mapper.treeToValue(node, RecentFilings.class);
