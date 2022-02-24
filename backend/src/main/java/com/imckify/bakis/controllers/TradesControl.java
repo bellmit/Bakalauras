@@ -18,11 +18,6 @@ public class TradesControl {
     @Autowired
     private TradesRepo TradesRepo;
 
-//    @GetMapping("")       // NEREIKALINGAS
-//    public List<Trades> getTrades() {
-//        return this.TradesRepo.findAll();
-//    }
-
     @GetMapping("/investor/{id}")
     public List<Trades> getInvestorTrades(@PathVariable(value = "id") int id){
         Optional<List<Trades>> Trades = this.TradesRepo.findByInvestorsID(id);

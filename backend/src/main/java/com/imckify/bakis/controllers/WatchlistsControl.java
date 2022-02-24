@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -16,9 +17,9 @@ public class WatchlistsControl {
     @Autowired
     private WatchlistsRepo WatchlistsRepo;
 
-    @GetMapping("")
-    public List<Watchlists> getWatchlists() {
-        return this.WatchlistsRepo.findAll();
+    @GetMapping("/investor/{id}")
+    public List<Watchlists> getInvestorWatchlist(@PathVariable(value = "id") int id){
+        return this.WatchlistsRepo.findByInvestorsID(id).orElseGet(ArrayList::new);
     }
 
     @GetMapping("/{id}")
