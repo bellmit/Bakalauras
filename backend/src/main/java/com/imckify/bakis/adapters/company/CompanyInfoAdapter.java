@@ -51,7 +51,7 @@ public class CompanyInfoAdapter {
         ObjectMapper mapper = new ObjectMapper();
 
         Map<String, String> map = mapper.readValue(json, new TypeReference<HashMap<String, String>>() {});
-        this.ndx = map;
+        this.ndx = map; // Todo remove tickers with same cik in python ndx script
     }
 
 //    @Scheduled(fixedDelay = 10 * 1000)
