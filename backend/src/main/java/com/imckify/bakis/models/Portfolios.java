@@ -12,7 +12,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class Portfolios {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer ID;
 
     @Column(name = "value")

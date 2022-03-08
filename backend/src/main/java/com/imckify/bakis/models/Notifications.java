@@ -13,7 +13,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Notifications {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer ID;
 
     @Column(name = "name")

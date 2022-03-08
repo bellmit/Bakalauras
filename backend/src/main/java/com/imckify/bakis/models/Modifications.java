@@ -12,7 +12,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class Modifications {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer ID;
 
     @Column(name = "HTML")

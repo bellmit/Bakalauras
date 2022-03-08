@@ -13,7 +13,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 public class Reports {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer ID;
 
     @Column(name = "cik")
