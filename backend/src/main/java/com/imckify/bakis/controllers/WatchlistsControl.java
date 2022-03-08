@@ -1,7 +1,10 @@
 package com.imckify.bakis.controllers;
 
 import com.imckify.bakis.Bakis.ResourceNotFoundException;
+import com.imckify.bakis.models.WatchlistCompanies;
 import com.imckify.bakis.models.Watchlists;
+import com.imckify.bakis.repos.CompaniesRepo;
+import com.imckify.bakis.repos.WatchlistCompaniesRepo;
 import com.imckify.bakis.repos.WatchlistsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/Watchlists")
@@ -17,9 +21,15 @@ public class WatchlistsControl {
     @Autowired
     private WatchlistsRepo WatchlistsRepo;
 
+    @Autowired
+    private WatchlistCompaniesRepo wcRepo;
+
+    @Autowired
+    private CompaniesRepo CompaniesRepo;
+
     @GetMapping("/investor/{id}")
     public List<Watchlists> getInvestorWatchlist(@PathVariable(value = "id") int id){
-        return this.WatchlistsRepo.findByInvestorsID(id).orElseGet(ArrayList::new);
+        return this.WatchlistsRepo.getWatchlistsByInvestorsID(id).orElseGet(ArrayList::new);
     }
 
     @GetMapping("/{id}")
@@ -41,20 +51,30 @@ public class WatchlistsControl {
     }
 
 
-    @PostMapping("/update/{id}")
-    public Watchlists updateWatchlist(@RequestBody Watchlists newWatchlist, @PathVariable(value = "id") int id){
-        return this.WatchlistsRepo.findById(id)
+    @PostMapping("/update/{name}")
+    public Watchlists updateWatchlist(@RequestBody Watchlists newWatchlist, @PathVariable(value = "name") String oldName){
+        return this.WatchlistsRepo.findByName(oldName)
                 .map(Watchlist -> {
                     Watchlist.setName(newWatchlist.getName());
-                    Watchlist.setTicker(newWatchlist.getTicker());
-                    Watchlist.setCompaniesID(newWatchlist.getCompaniesID());///////////////////////////////////////////
-
                     return this.WatchlistsRepo.save(Watchlist);
                 })
-                .orElseGet(()->{
-                    newWatchlist.setID(id);
-                    return this.WatchlistsRepo.save(newWatchlist);
-                });
+                .orElseThrow(()-> new ResourceNotFoundException("Watchlist not found"));
+    }
+
+    @GetMapping("/investor/{id}")
+    public List<WatchlistCompanies> getInvestorWatchlist(@PathVariable(value = "id") int id){
+        return this.wcRepo.getWatchlistsByInvestorsID(id).orElseGet(ArrayList::new);
+    }
+
+    @PostMapping("/add/{name}")
+    public WatchlistCompanies addWatchlistCompany(@RequestBody WatchlistCompanies newWC, @PathVariable(value = "name") String name){
+        return this.WatchlistsRepo.findByName(name)
+                .map(Watchlist -> {
+                    newWC.setWatchlistsID(Watchlist.getID());
+                    this.CompaniesRepo.findById(newWC.getCompaniesID()).orElseThrow(()-> new ResourceNotFoundException("Company not found. Bad ID"));
+                    return this.wcRepo.save(newWC);
+                })
+                .orElseThrow(()-> new ResourceNotFoundException("Watchlist not found. Bad ID"));
     }
 }
 
