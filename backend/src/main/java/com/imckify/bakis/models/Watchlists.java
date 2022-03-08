@@ -18,12 +18,6 @@ public class Watchlists {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "ticker")
-    private String ticker;
-
     @Column(name = "InvestorsID")
     private Integer investorsID;
-
-    @Column(name = "CompaniesID")
-    private Integer companiesID;
 }
