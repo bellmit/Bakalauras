@@ -10,7 +10,7 @@ spring:
 
   # Hibernate ddl auto (create, create-drop, validate, update)
     hibernate:
-      ddl-auto: update
+      ddl-auto: none # none forbids Hibernate to manage DB. Structure and data must be imported from scripts
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
