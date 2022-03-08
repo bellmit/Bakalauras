@@ -1,10 +1,7 @@
 package com.imckify.bakis.controllers;
 
 import com.imckify.bakis.Bakis.ResourceNotFoundException;
-import com.imckify.bakis.models.WatchlistCompanies;
 import com.imckify.bakis.models.Watchlists;
-import com.imckify.bakis.repos.CompaniesRepo;
-import com.imckify.bakis.repos.WatchlistCompaniesRepo;
 import com.imckify.bakis.repos.WatchlistsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/Watchlists")
@@ -21,15 +17,9 @@ public class WatchlistsControl {
     @Autowired
     private WatchlistsRepo WatchlistsRepo;
 
-    @Autowired
-    private WatchlistCompaniesRepo wcRepo;
-
-    @Autowired
-    private CompaniesRepo CompaniesRepo;
-
     @GetMapping("/investor/{id}")
-    public List<Watchlists> getInvestorWatchlist(@PathVariable(value = "id") int id){
-        return this.WatchlistsRepo.getWatchlistsByInvestorsID(id).orElseGet(ArrayList::new);
+    public List<Watchlists> getInvestorWatchlists(@PathVariable(value = "id") int investorID){
+        return this.WatchlistsRepo.findByInvestorsID(investorID).orElseGet(ArrayList::new);
     }
 
     @GetMapping("/{id}")
@@ -59,22 +49,6 @@ public class WatchlistsControl {
                     return this.WatchlistsRepo.save(Watchlist);
                 })
                 .orElseThrow(()-> new ResourceNotFoundException("Watchlist not found"));
-    }
-
-    @GetMapping("/investor/{id}")
-    public List<WatchlistCompanies> getInvestorWatchlist(@PathVariable(value = "id") int id){
-        return this.wcRepo.getWatchlistsByInvestorsID(id).orElseGet(ArrayList::new);
-    }
-
-    @PostMapping("/add/{name}")
-    public WatchlistCompanies addWatchlistCompany(@RequestBody WatchlistCompanies newWC, @PathVariable(value = "name") String name){
-        return this.WatchlistsRepo.findByName(name)
-                .map(Watchlist -> {
-                    newWC.setWatchlistsID(Watchlist.getID());
-                    this.CompaniesRepo.findById(newWC.getCompaniesID()).orElseThrow(()-> new ResourceNotFoundException("Company not found. Bad ID"));
-                    return this.wcRepo.save(newWC);
-                })
-                .orElseThrow(()-> new ResourceNotFoundException("Watchlist not found. Bad ID"));
     }
 }
 

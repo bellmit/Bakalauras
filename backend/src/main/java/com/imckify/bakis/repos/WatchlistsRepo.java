@@ -7,5 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface WatchlistsRepo extends JpaRepository<Watchlists, Integer> {
+    Optional<Watchlists> findByName(String name);
     Optional<List<Watchlists>> findByInvestorsID(Integer id);
 }
