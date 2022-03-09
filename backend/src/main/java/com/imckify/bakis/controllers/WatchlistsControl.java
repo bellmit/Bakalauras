@@ -42,8 +42,12 @@ public class WatchlistsControl {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "id") int id){
         Watchlists Watchlist = this.WatchlistsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found "+id));
+        List<WatchlistCompanies> wc = this.wcRepo.findAllByWatchlistsID(id).orElseThrow(
+                ()-> new ResourceNotFoundException("Watchlist companies not found, id: " + id)
+        );;
 
         this.WatchlistsRepo.delete(Watchlist);
+        this.wcRepo.deleteAll(wc);
         return ResponseEntity.ok().build();
     }
 
@@ -65,7 +69,7 @@ public class WatchlistsControl {
     }
 
     @DeleteMapping("/remove/{companiesID}/{watchlistsID}")
-    public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "companiesID") int companiesID, @PathVariable(value = "watchlistsID") int watchlistsID){
+    public ResponseEntity<Void> deleteWatchlistCompany(@PathVariable(value = "companiesID") int companiesID, @PathVariable(value = "watchlistsID") int watchlistsID){
         WatchlistCompanies wc = this.wcRepo.findByCompaniesIDAndWatchlistsID(companiesID, watchlistsID).orElseThrow(
                 ()-> new ResourceNotFoundException("Watchlist company not found companiesID: " + companiesID + " " + watchlistsID)
         );
