@@ -24,17 +24,17 @@ public class WatchlistsControl {
         return this.WatchlistsRepo.findByInvestorsID(investorID).orElseGet(ArrayList::new).stream().map(Watchlists::toViewModel).collect(Collectors.toList());
     }
 
-    @GetMapping("/{id}")
-    public WatchlistsVM getWatchlists(@PathVariable(value = "id") int id){
-        return this.WatchlistsRepo.findById(id).map(Watchlists::toViewModel).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found"));
+    @GetMapping("/{name}")
+    public WatchlistsVM getWatchlists(@PathVariable(value = "name") String name){
+        return this.WatchlistsRepo.findByName(name).map(Watchlists::toViewModel).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found"));
     }
 
     // TODO below GUI & BE
 
-//    @PostMapping("/create")
-//    public Watchlists createWatchlist(@RequestBody Watchlists Watchlist){
-//        return this.WatchlistsRepo.save(Watchlist);
-//    }
+    @PostMapping("/create")
+    public Watchlists createWatchlist(@RequestBody Watchlists Watchlist){
+        return this.WatchlistsRepo.save(Watchlist);
+    }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "id") int id){
@@ -44,15 +44,16 @@ public class WatchlistsControl {
         return ResponseEntity.ok().build();
     }
 
-
-//    @PostMapping("/update/{name}")
-//    public Watchlists updateWatchlist(@RequestBody Watchlists newWatchlist, @PathVariable(value = "name") String oldName){
-//        return this.WatchlistsRepo.findByName(oldName)
-//                .map(Watchlist -> {
-//                    Watchlist.setName(newWatchlist.getName());
-//                    return this.WatchlistsRepo.save(Watchlist);
-//                })
-//                .orElseThrow(()-> new ResourceNotFoundException("Watchlist not found"));
-//    }
+    @PostMapping("/update/{name}")
+    public Watchlists updateWatchlist(@RequestBody Watchlists newWatchlist, @PathVariable(value = "name") String oldName){
+        return this.WatchlistsRepo.findByName(oldName)
+                .map(w -> {
+                    // saving newWatchlist because found one contains recursive companies field
+                    newWatchlist.setID(w.getID());
+                    newWatchlist.setInvestorsID(w.getInvestorsID());
+                    return this.WatchlistsRepo.save(newWatchlist);
+                })
+                .orElseThrow(()-> new ResourceNotFoundException("Watchlist not found"));
+    }
 }
 
