@@ -1,8 +1,10 @@
 package com.imckify.bakis.controllers;
 
 import com.imckify.bakis.Bakis.ResourceNotFoundException;
+import com.imckify.bakis.models.WatchlistCompanies;
 import com.imckify.bakis.models.Watchlists;
 import com.imckify.bakis.models.WatchlistsVM;
+import com.imckify.bakis.repos.WatchlistCompaniesRepo;
 import com.imckify.bakis.repos.WatchlistsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +21,9 @@ public class WatchlistsControl {
     @Autowired
     private WatchlistsRepo WatchlistsRepo;
 
+    @Autowired
+    private WatchlistCompaniesRepo wcRepo;
+
     @GetMapping("/investor/{id}")
     public List<WatchlistsVM> getInvestorWatchlists(@PathVariable(value = "id") int investorID){
         return this.WatchlistsRepo.findByInvestorsID(investorID).orElseGet(ArrayList::new).stream().map(Watchlists::toViewModel).collect(Collectors.toList());
@@ -29,20 +34,18 @@ public class WatchlistsControl {
         return this.WatchlistsRepo.findByName(name).map(Watchlists::toViewModel).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found"));
     }
 
-    // TODO below GUI & BE
-
     @PostMapping("/create")
     public Watchlists createWatchlist(@RequestBody Watchlists Watchlist){
         return this.WatchlistsRepo.save(Watchlist);
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "id") int id){
-        Watchlists Watchlist = this.WatchlistsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found "+id));
-
-        this.WatchlistsRepo.delete(Watchlist);
-        return ResponseEntity.ok().build();
-    }
+//    @DeleteMapping("/delete/{id}")
+//    public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "id") int id){
+//        Watchlists Watchlist = this.WatchlistsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found "+id));
+//
+//        this.WatchlistsRepo.delete(Watchlist);
+//        return ResponseEntity.ok().build();
+//    }
 
     @PostMapping("/update/{name}")
     public Watchlists updateWatchlist(@RequestBody Watchlists newWatchlist, @PathVariable(value = "name") String oldName){
@@ -55,5 +58,19 @@ public class WatchlistsControl {
                 })
                 .orElseThrow(()-> new ResourceNotFoundException("Watchlist not found"));
     }
+
+    @PostMapping("/add")
+    public WatchlistCompanies addWatchlistCompany(@RequestBody WatchlistCompanies newWC){
+        return this.wcRepo.save(newWC);
+    }
+
+//    @DeleteMapping("/delete/{id}")
+//    public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "id") int companyID){
+//        // Todo needed WatchlistCompanies: ID or WatchlistID
+//        WatchlistCompanies wc = this.wcRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Watchlist company not found "+id));
+//
+//        this.wcRepo.delete(wc);
+//        return ResponseEntity.ok().build();
+//    }
 }
 
