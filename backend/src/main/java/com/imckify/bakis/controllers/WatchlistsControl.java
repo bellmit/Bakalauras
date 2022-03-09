@@ -65,7 +65,11 @@ public class WatchlistsControl {
 
     @PostMapping("/add")
     public WatchlistCompanies addWatchlistCompany(@RequestBody WatchlistCompanies newWC){
-        return this.wcRepo.save(newWC);
+        // Todo move validation (company already exists in watchlist) to GUI WatchlistForm redux-form
+        if (!this.wcRepo.findByCompaniesIDAndWatchlistsID(newWC.getCompaniesID(), newWC.getWatchlistsID()).isPresent()) {
+            return this.wcRepo.save(newWC);
+        }
+        return null;
     }
 
     @DeleteMapping("/remove/{companiesID}/{watchlistsID}")
