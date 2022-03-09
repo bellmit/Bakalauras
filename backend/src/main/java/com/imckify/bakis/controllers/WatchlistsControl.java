@@ -39,13 +39,13 @@ public class WatchlistsControl {
         return this.WatchlistsRepo.save(Watchlist);
     }
 
-//    @DeleteMapping("/delete/{id}")
-//    public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "id") int id){
-//        Watchlists Watchlist = this.WatchlistsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found "+id));
-//
-//        this.WatchlistsRepo.delete(Watchlist);
-//        return ResponseEntity.ok().build();
-//    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "id") int id){
+        Watchlists Watchlist = this.WatchlistsRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Watchlist not found "+id));
+
+        this.WatchlistsRepo.delete(Watchlist);
+        return ResponseEntity.ok().build();
+    }
 
     @PostMapping("/update/{name}")
     public Watchlists updateWatchlist(@RequestBody Watchlists newWatchlist, @PathVariable(value = "name") String oldName){
@@ -64,13 +64,14 @@ public class WatchlistsControl {
         return this.wcRepo.save(newWC);
     }
 
-//    @DeleteMapping("/delete/{id}")
-//    public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "id") int companyID){
-//        // Todo needed WatchlistCompanies: ID or WatchlistID
-//        WatchlistCompanies wc = this.wcRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Watchlist company not found "+id));
-//
-//        this.wcRepo.delete(wc);
-//        return ResponseEntity.ok().build();
-//    }
+    @DeleteMapping("/remove/{companiesID}/{watchlistsID}")
+    public ResponseEntity<Void> deleteWatchlist(@PathVariable(value = "companiesID") int companiesID, @PathVariable(value = "watchlistsID") int watchlistsID){
+        WatchlistCompanies wc = this.wcRepo.findByCompaniesIDAndWatchlistsID(companiesID, watchlistsID).orElseThrow(
+                ()-> new ResourceNotFoundException("Watchlist company not found companiesID: " + companiesID + " " + watchlistsID)
+        );
+
+        this.wcRepo.delete(wc);
+        return ResponseEntity.ok().build();
+    }
 }
 
