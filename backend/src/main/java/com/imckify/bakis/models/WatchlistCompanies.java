@@ -19,5 +19,16 @@ public class WatchlistCompanies {
     @Column(name="WatchlistsID")
     private Integer watchlistsID;
 
+//    @ManyToOne
+//    @JoinColumn(name="WatchlistsID", nullable=true)
+//    private Watchlists watchlist = null;
 
+    public static WatchlistCompaniesVM toViewModel(WatchlistCompanies wc) {
+        WatchlistCompaniesVM vm = new WatchlistCompaniesVM();
+        vm.setID(wc.getID());
+        vm.setCompaniesID(wc.getCompaniesID());
+//        vm.setWatchlistsID(wc.getWatchlist().getID());
+
+        return vm;
+    }
 }

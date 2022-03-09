@@ -25,10 +25,11 @@ public class Companies {
     private List<Watchlists> watchlists = new ArrayList<Watchlists>();
 
     public static CompaniesVM toViewModel(Companies c) {
-        CompaniesVM cr = new CompaniesVM();
-        cr.setID(c.getID());
-        cr.setTicker(c.getTicker());
-        cr.setName(c.getName());
-        return cr;
+        CompaniesVM vm = new CompaniesVM();
+        vm.setID(c.getID());
+        vm.setTicker(c.getTicker());
+        vm.setName(c.getName());
+        
+        return vm;
     }
 }

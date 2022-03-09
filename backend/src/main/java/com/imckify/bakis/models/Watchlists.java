@@ -28,12 +28,17 @@ public class Watchlists {
             inverseJoinColumns = { @JoinColumn(name = "CompaniesID") })
     private List<Companies> companies = new ArrayList<Companies>();
 
+//    @OneToMany(mappedBy="watchlist")
+//    private List<WatchlistCompanies> watchlistCompanies;
+
     public static WatchlistsVM toViewModel(Watchlists dto) {
-        WatchlistsVM r = new WatchlistsVM();
-        r.setID(dto.getID());
-        r.setName(dto.getName());
-        r.setInvestorsID(dto.getInvestorsID());
-        r.setCompanies(dto.getCompanies().stream().map(Companies::toViewModel).collect(Collectors.toList()));
-        return r;
+        WatchlistsVM vm = new WatchlistsVM();
+        vm.setID(dto.getID());
+        vm.setName(dto.getName());
+        vm.setInvestorsID(dto.getInvestorsID());
+        vm.setCompanies(dto.getCompanies().stream().map(Companies::toViewModel).collect(Collectors.toList()));
+//        vm.setWatchlistCompanies(dto.getWatchlistCompanies().stream().map(WatchlistCompanies::toViewModel).collect(Collectors.toList()));
+        
+        return vm;
     }
 }
