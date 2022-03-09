@@ -1,7 +1,9 @@
 package com.imckify.bakis.controllers;
 
 import com.imckify.bakis.Bakis.ResourceNotFoundException;
+import com.imckify.bakis.models.CompaniesResponse;
 import com.imckify.bakis.models.Watchlists;
+import com.imckify.bakis.models.WatchlistsResponse;
 import com.imckify.bakis.repos.WatchlistsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/Watchlists")
@@ -18,8 +21,21 @@ public class WatchlistsControl {
     private WatchlistsRepo WatchlistsRepo;
 
     @GetMapping("/investor/{id}")
-    public List<Watchlists> getInvestorWatchlists(@PathVariable(value = "id") int investorID){
-        return this.WatchlistsRepo.findByInvestorsID(investorID).orElseGet(ArrayList::new);
+    public List<WatchlistsResponse> getInvestorWatchlists(@PathVariable(value = "id") int investorID){
+        return this.WatchlistsRepo.findByInvestorsID(investorID).orElseGet(ArrayList::new).stream().map(dto -> {
+            WatchlistsResponse r = new WatchlistsResponse();
+            r.setID(dto.getID());
+            r.setName(dto.getName());
+            r.setInvestorsID(dto.getInvestorsID());
+            r.setCompanies(dto.getCompanies().stream().map(c -> {
+                CompaniesResponse cr = new CompaniesResponse();
+                cr.setID(c.getID());
+                cr.setTicker(c.getTicker());
+                cr.setName(c.getName());
+                return cr;
+            }).collect(Collectors.toList()));
+            return r;
+        }).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")

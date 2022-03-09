@@ -3,14 +3,12 @@ package com.imckify.bakis.models;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WatchlistCompanies implements Serializable {
+public class WatchlistCompanies {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer ID;
@@ -18,8 +16,8 @@ public class WatchlistCompanies implements Serializable {
     @Column(name = "CompaniesID")
     private Integer companiesID;
 
-    @ManyToOne
-    @JoinColumn(name="WatchlistsID", nullable=false)
-    private Watchlists watchlists;
+    @Column(name="WatchlistsID")
+    private Integer watchlistsID;
+
 
 }

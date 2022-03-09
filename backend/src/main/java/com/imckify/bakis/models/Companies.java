@@ -1,10 +1,10 @@
 package com.imckify.bakis.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -20,4 +20,7 @@ public class Companies {
 
     @Column(name = "name")
     private String name;
+
+    @ManyToMany(mappedBy="companies")
+    private List<Watchlists> watchlists = new ArrayList<Watchlists>();
 }

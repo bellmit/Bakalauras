@@ -3,15 +3,14 @@ package com.imckify.bakis.models;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Watchlists implements Serializable {
+public class Watchlists {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer ID;
@@ -22,6 +21,9 @@ public class Watchlists implements Serializable {
     @Column(name = "InvestorsID")
     private Integer investorsID;
 
-    @OneToMany(mappedBy="watchlists")
-    private List<WatchlistCompanies> watchlistCompanies;
+    @ManyToMany
+    @JoinTable(name = "WatchlistCompanies",
+            joinColumns = { @JoinColumn(name = "WatchlistsID") },
+            inverseJoinColumns = { @JoinColumn(name = "CompaniesID") })
+    private List<Companies> companies = new ArrayList<Companies>();
 }
