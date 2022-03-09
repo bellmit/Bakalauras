@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class WatchlistsResponse {
+public class WatchlistsVM {
     private Integer ID;
     private String name;
     private Integer investorsID;
-    private List<CompaniesResponse> companies = new ArrayList<CompaniesResponse>();
+    private List<CompaniesVM> companies = new ArrayList<CompaniesVM>();
 }

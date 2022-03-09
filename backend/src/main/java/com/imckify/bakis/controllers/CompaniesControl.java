@@ -2,12 +2,14 @@ package com.imckify.bakis.controllers;
 
 import com.imckify.bakis.Bakis.ResourceNotFoundException;
 import com.imckify.bakis.models.Companies;
+import com.imckify.bakis.models.CompaniesVM;
 import com.imckify.bakis.repos.CompaniesRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/Companies")
@@ -17,19 +19,19 @@ public class CompaniesControl {
     private CompaniesRepo CompaniesRepo;
 
     @GetMapping("")
-    public List<Companies> getCompanies() {
-        return this.CompaniesRepo.findAll();
+    public List<CompaniesVM> getCompanies() {
+        return this.CompaniesRepo.findAll().stream().map(Companies::toViewModel).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public Companies getCompanies(@PathVariable(value = "id") int id){
-        return this.CompaniesRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Company not found"));
+    public CompaniesVM getCompanies(@PathVariable(value = "id") int id){
+        return this.CompaniesRepo.findById(id).map(Companies::toViewModel).orElseThrow(()-> new ResourceNotFoundException("Company not found"));
     }
 
-    @PostMapping("/create")
-    public Companies createCompany(@RequestBody Companies Company){
-        return this.CompaniesRepo.save(Company);
-    }
+//    @PostMapping("/create")
+//    public CompaniesVM createCompany(@RequestBody Companies Company){
+//        return this.CompaniesRepo.save(Company);
+//    }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deleteCompany(@PathVariable(value = "id") int id){
@@ -40,19 +42,19 @@ public class CompaniesControl {
     }
 
 
-    @PostMapping("/update/{id}")
-    public Companies updateCompany(@RequestBody Companies newCompany, @PathVariable(value = "id") int id){
-        return this.CompaniesRepo.findById(id)
-                .map(Company -> {
-                    Company.setName(newCompany.getName());
-                    Company.setTicker(newCompany.getTicker());
-
-                    return this.CompaniesRepo.save(Company);
-                })
-                .orElseGet(()->{
-                    newCompany.setID(id);
-                    return this.CompaniesRepo.save(newCompany);
-                });
-    }
+//    @PostMapping("/update/{id}")
+//    public CompaniesVM updateCompany(@RequestBody Companies newCompany, @PathVariable(value = "id") int id){
+//        return this.CompaniesRepo.findById(id)
+//                .map(Company -> {
+//                    Company.setName(newCompany.getName());
+//                    Company.setTicker(newCompany.getTicker());
+//
+//                    return this.CompaniesRepo.save(Company);
+//                })
+//                .orElseGet(()->{
+//                    newCompany.setID(id);
+//                    return this.CompaniesRepo.save(newCompany);
+//                });
+//    }
 }
 

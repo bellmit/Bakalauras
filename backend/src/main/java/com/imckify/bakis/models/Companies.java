@@ -23,4 +23,12 @@ public class Companies {
 
     @ManyToMany(mappedBy="companies")
     private List<Watchlists> watchlists = new ArrayList<Watchlists>();
+
+    public static CompaniesVM toViewModel(Companies c) {
+        CompaniesVM cr = new CompaniesVM();
+        cr.setID(c.getID());
+        cr.setTicker(c.getTicker());
+        cr.setName(c.getName());
+        return cr;
+    }
 }
