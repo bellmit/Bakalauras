@@ -19,10 +19,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -46,7 +45,7 @@ public class CompanyInfoAdapter {
 
     @PostConstruct
     private void loadNDX () throws IOException {
-        File json = Objects.requireNonNull(Paths.get("/home/asd/IdeaProjects/Bakalauras/data/cik/ndx.json")).toFile();
+        InputStream json = this.getClass().getResourceAsStream("/ndx.json");
 
         ObjectMapper mapper = new ObjectMapper();
 
