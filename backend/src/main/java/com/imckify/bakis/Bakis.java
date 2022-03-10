@@ -70,7 +70,7 @@ public class Bakis {
 	@Bean
 	public MetadataStore metadataStore() {
 		PropertiesPersistingMetadataStore metadataStore = new PropertiesPersistingMetadataStore();
-		metadataStore.setBaseDirectory("/home/asd/IdeaProjects/Bakalauras/backend/src/main/resources/" + "temp");
+		metadataStore.setBaseDirectory(getClass().getResource("/").getPath()); // in resources
 		return metadataStore;
 	}
 
