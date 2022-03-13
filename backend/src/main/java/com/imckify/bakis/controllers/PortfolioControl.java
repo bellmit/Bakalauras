@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/Portfolios")
-public class PortfoliosControl {
+@RequestMapping("/api/Portfolio")
+public class PortfolioControl {
 
     @Autowired
     private PortfoliosRepo PortfoliosRepo;
@@ -24,6 +24,11 @@ public class PortfoliosControl {
     @GetMapping("/{id}")
     public Portfolios getPortfolios(@PathVariable(value = "id") int id){
         return this.PortfoliosRepo.findById(id).orElseThrow(()-> new ResourceNotFoundException("Portfolio not found"));
+    }
+
+    @GetMapping("/investor/{id}")
+    public List<Portfolios> getInvestorPortfolios(@PathVariable(value = "id") int id){
+        return this.PortfoliosRepo.findByInvestorsID(id).orElseThrow(()-> new ResourceNotFoundException("Portfolio not found"));
     }
 
     @PostMapping("/create")
