@@ -3,15 +3,16 @@ package com.imckify.bakis.adapters.prices;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileSystemUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.stream.Stream;
+import java.util.Objects;
 
 @Component
 public class AlphaVantageAdapter {
@@ -20,38 +21,34 @@ public class AlphaVantageAdapter {
     private String priceDir = "";
 
     @PostConstruct
-    private void load () throws IOException {
-        String resourcesDir = getClass().getResource("/").getPath();
+    private void setupPriceDir () {
+        String resourcesDir = Objects.requireNonNull(getClass().getResource("/")).getPath();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        this.priceDir = "prices " + sdf.format(new Date());
+        String prefix = "prices_alphaVantage_";
+        this.priceDir = prefix + sdf.format(new Date());
 
-        String existingPricesDir = null;
-
-        try (Stream<Path> paths = Files.walk(Paths.get(resourcesDir))) {
-            existingPricesDir = paths
+        try {
+            Files.walk(Paths.get(resourcesDir), 1)
                     .filter(Files::isDirectory)
-                    .filter(p -> p.getFileName().toString().toLowerCase().contains(this.priceDir))
-                    .findFirst()
-                    .map(Path::toString)
-                    .orElseGet(() -> "");
-        }
+                    .map(p -> p.getFileName().toString())
+                    .filter(s -> s.contains(prefix))
+                    .forEach(s -> {
+                        if (!s.contains(this.priceDir)) {
+                            try {
+                                FileSystemUtils.deleteRecursively(Paths.get(resourcesDir, s));
+                            } catch (IOException e) {
+                                e.printStackTrace();
 
-        if (!existingPricesDir.equals("")) {
-            Files.walk(Paths.get(resourcesDir))
-                    .filter(Files::isDirectory)
-                    .filter(p -> p.getFileName().toString().toLowerCase().contains("prices"))
-                    .map(p -> {
-                        try {
-                            return Files.deleteIfExists(p);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            return false;
+                            }
                         }
                     });
-        }
 
-        Files.createDirectory(Paths.get(existingPricesDir));
-        this.priceDir = existingPricesDir;
+
+            Files.createDirectory(Paths.get(resourcesDir, this.priceDir));
+        } catch (IOException e) {
+            logger.error((Arrays.toString(e.getStackTrace())));
+            e.printStackTrace();
+        }
     }
 }
