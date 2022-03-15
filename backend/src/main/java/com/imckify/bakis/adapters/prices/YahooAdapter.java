@@ -15,8 +15,8 @@ import java.util.Date;
 import java.util.Objects;
 
 @Component
-public class AlphaVantageAdapter {
-    public static final Logger logger = LoggerFactory.getLogger(AlphaVantageAdapter.class);
+public class YahooAdapter {
+    public static final Logger logger = LoggerFactory.getLogger(YahooAdapter.class);
 
     private String priceDir = "";
 
@@ -25,7 +25,7 @@ public class AlphaVantageAdapter {
         String resourcesDir = Objects.requireNonNull(getClass().getResource("/")).getPath();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String prefix = "prices_alphaVantage_";
+        String prefix = "prices_yahoo_";
         this.priceDir = prefix + sdf.format(new Date());
 
         try {
@@ -34,7 +34,7 @@ public class AlphaVantageAdapter {
                     .map(p -> p.getFileName().toString())
                     .filter(s -> s.contains(prefix))
                     .forEach(s -> {
-                        if (!s.contains(this.priceDir)) {
+                        if (!s.contains(this.priceDir)) { // also refreshes during weekends
                             try {
                                 FileSystemUtils.deleteRecursively(Paths.get(resourcesDir, s));
                             } catch (IOException e) {
