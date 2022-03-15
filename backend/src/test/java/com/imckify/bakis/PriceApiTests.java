@@ -21,7 +21,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PriceApiTests {
 
@@ -101,7 +101,7 @@ public class PriceApiTests {
     }
 
     @Test
-    public void nasdaqPrettyArrayReal() throws IOException {
+    public void nasdaqPrettyArrayReal() {
         String url = "https://data.nasdaq.com/api/v3/datasets/WIKI/FB/data.json?api_key=" + API_nasdaq;
 
         InputStream inputStream = get(url);
@@ -112,7 +112,7 @@ public class PriceApiTests {
     }
 
     @Test
-    public void iexYesterdayReal() throws IOException {
+    public void iexYesterdayReal() {
         String url = "https://cloud.iexapis.com/stable/stock/aapl/previous?token=" + API_iex;
 //        String url = "https://sandbox.iexapis.com/stable/stock/aapl/quote?token=" + API_iex_demo; // Todo not working
 
@@ -124,7 +124,7 @@ public class PriceApiTests {
     }
 
     @Test
-    public void iexHistoricalReal() throws IOException {
+    public void iexHistoricalReal() {
         String url = "https://cloud.iexapis.com/stable/stock/aapl/chart/H12018?token=" + API_iex;
 
         InputStream inputStream = get(url);
@@ -135,7 +135,7 @@ public class PriceApiTests {
     }
 
     @Test
-    public void alphaVantageYesterdayDemo() throws IOException {
+    public void alphaVantageYesterdayDemo() {
         String url = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=" + API_alphaVantage_demo;
 
         InputStream inputStream = get(url);
@@ -146,7 +146,7 @@ public class PriceApiTests {
     }
 
     @Test
-    public void alphaVantageHistoricalDemo() throws IOException {
+    public void alphaVantageHistoricalDemo() {
         String url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=IBM&outputsize=full&apikey=" + API_alphaVantage_demo;
 
         InputStream inputStream = get(url);
@@ -155,8 +155,9 @@ public class PriceApiTests {
 
         System.out.println(pretty);
     }
+
     @Test
-    public void alphaVantageHistoricalReal() throws IOException {
+    public void alphaVantageHistoricalReal() {
         String url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&outputsize=full&apikey=" + API_alphaVantage;
 
         InputStream inputStream = get(url);
@@ -165,5 +166,28 @@ public class PriceApiTests {
 
         System.out.println(pretty);
     }
-    
+
+    @Test
+    public void alphaVantageHistoricalAdjustedFail() {
+        String url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=AAPL&outputsize=full&apikey=" + API_alphaVantage;
+
+        InputStream inputStream = get(url);
+
+        String pretty = parse(inputStream);
+
+        System.out.println(pretty);
+
+        assertTrue(pretty.contains("This is a premium endpoint"));
+    }
+
+    @Test
+    public void yahooFinanceHistoricalReal() {
+        String url = "https://query1.finance.yahoo.com/v8/finance/chart/AAPL?symbol=AAPL&period1=0&period2=9999999999&interval=1d&includePrePost=true&events=div%7Csplit";
+
+        InputStream inputStream = get(url);
+
+        String pretty = parse(inputStream);
+
+        System.out.println(pretty);
+    }
 }
