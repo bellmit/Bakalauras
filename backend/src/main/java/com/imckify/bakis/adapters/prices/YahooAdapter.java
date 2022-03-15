@@ -7,6 +7,7 @@ import org.springframework.util.FileSystemUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -47,8 +48,10 @@ public class YahooAdapter {
 
             Files.createDirectory(Paths.get(resourcesDir, this.priceDir));
         } catch (IOException e) {
-            logger.error((Arrays.toString(e.getStackTrace())));
-            e.printStackTrace();
+            if (!(e instanceof FileAlreadyExistsException)) {
+                logger.error((Arrays.toString(e.getStackTrace())));
+                e.printStackTrace();
+            }
         }
     }
 }
