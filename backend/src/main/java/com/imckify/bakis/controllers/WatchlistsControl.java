@@ -46,8 +46,8 @@ public class WatchlistsControl {
                 ()-> new ResourceNotFoundException("Watchlist companies not found, id: " + id)
         );;
 
-        this.WatchlistsRepo.delete(Watchlist);
         this.wcRepo.deleteAll(wc);
+        this.WatchlistsRepo.delete(Watchlist);
         return ResponseEntity.ok().build();
     }
 
