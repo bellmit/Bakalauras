@@ -1,14 +1,9 @@
 spring:
+  # add JVM option: -Dspring.profiles.active=prod
   datasource:
-#    Todo DEPLOY
-#    url: jdbc:mysql://10.10.11.39/web-l-s1?useSSL=false
-#    username: web-l-s1
-#    password: DBr-studentui2203
-
-#    Todo DEV
-    url: jdbc:mysql://localhost:3306/bakisDB?useSSL=false
-    username: root
-    password:
+    url: jdbc:mysql://10.10.11.39/web-l-s1?useSSL=false
+    username: web-l-s1
+    password: DBr-studentui2203
   jpa:
     properties:
       hibernate:
