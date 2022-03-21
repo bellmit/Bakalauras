@@ -36,6 +36,11 @@ public class Scraper {
 
     private static final Logger logger = LoggerFactory.getLogger(Scraper.class);
 
+    private final Header header = new BasicHeader(HttpHeaders.USER_AGENT, "iMckify imckify@gmail.com");
+    private final CloseableHttpClient client = HttpClients.custom().setDefaultHeaders(Collections.singletonList(header)).build();
+    private HttpUriRequest req = null;
+    private CloseableHttpResponse response = null;
+
     private List<String> exchanges = new ArrayList<String>() {{
         add("NASDAQ");
         add("NYSE");
@@ -44,10 +49,6 @@ public class Scraper {
     private String cik_selected = "cik/ndx.json"; //  # "../data/cik/cik.json" or "../data/cik/cik3.json"
     private String cik_excluded = "cik/cik_excluded.json";
     private List<String> tickers = new ArrayList<>();
-
-    private Header header = new BasicHeader(HttpHeaders.USER_AGENT, "iMckify imckify@gmail.com");
-    private CloseableHttpClient client = HttpClients.custom().setDefaultHeaders(Collections.singletonList(header)).build();
-    private HttpUriRequest req = new HttpGet();
 
     private boolean saveExcludedCik = false;
     private boolean scrapeSecDoc = false;
@@ -102,10 +103,11 @@ public class Scraper {
 
     private Map<String, String> fetchCiks() {
         Map<String, String> map = new HashMap<>();
-        for (String ticker : ProgressBar.wrap(this.tickers, "CIKS")) {
+        for (String ticker : ProgressBar.wrap(this.tickers, "fetchCiks")) {
             this.req = new HttpGet(String.format(this.url_simple_browse, ticker));
-            try (CloseableHttpResponse response = this.client.execute(this.req)) {
-                String json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+            try {
+                this.response = this.client.execute(this.req);
+                String json = EntityUtils.toString(this.response.getEntity(), StandardCharsets.UTF_8);
                 Pattern p = Pattern.compile(".*CIK=(\\d{10}).*");
                 Matcher m = p.matcher(json);
                 if (m.find()) {
