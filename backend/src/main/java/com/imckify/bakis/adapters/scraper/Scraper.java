@@ -62,48 +62,40 @@ public class Scraper {
     private String nasdaq = "https://old.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange={}&render=download".replaceAll("\\{\\}", "%s");
 
     @PostConstruct
-    private void runScript() {
-        List<Ticker> allTickers = fetchTickers();
-        this.tickers = allTickers.stream().map(Ticker::getSymbol).distinct().collect(Collectors.toList());
-        Map<String, String> cik_dict = loadSelectedOrFetchCiks();
-        logger.info(cik_dict.toString());
+    private void main() {
+        List<CompanyListed> allCompanies = fetchTickers();
+        List<String> tickers = allCompanies.stream().map(CompanyListed::getSymbol).distinct().collect(Collectors.toList()); // .distinct()
+
+        Map<String, String> ticker_cik;
+        File selectedJsonFile = new File(getClass().getClassLoader().getResource(this.cik_selected).getPath());
+        if (!selectedJsonFile.exists()) {
+            ticker_cik = fetchCiks(tickers);
+        } else {
+            ticker_cik = loadSelected(selectedJsonFile);
+        }
+
+        logger.info(ticker_cik.toString()); // Todo from L:164 scraper.py
     }
 
-    private List<Ticker> fetchTickers() {
-        List<Ticker> allTickers = new ArrayList<>();
+    private List<CompanyListed> fetchTickers() {
+        List<CompanyListed> allCompanies = new ArrayList<>();
         for (String exchange : this.exchanges) {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(String.format("tickers/%s.csv", exchange.toLowerCase()));
             try {
-                MappingIterator<Ticker> tickerIter = new CsvMapper().readerWithTypedSchemaFor(Ticker.class).readValues(inputStream);
-                List<Ticker> tickers = tickerIter.readAll();
-                tickers.remove(0); // skip header
-                allTickers.addAll(tickers);
+                MappingIterator<CompanyListed> companiesIter = new CsvMapper().readerWithTypedSchemaFor(CompanyListed.class).readValues(inputStream); // with JsonPropertyOrder instead of schema
+                List<CompanyListed> companies = companiesIter.readAll();
+                companies.remove(0); // skip header
+                allCompanies.addAll(companies);
             } catch (IOException e) {
                 logger.error("{}(), exchange {}:", new Object(){}.getClass().getEnclosingMethod().getName(), exchange, e);
             }
         }
-        return allTickers;
+        return allCompanies;
     }
 
-    private Map<String, String> loadSelectedOrFetchCiks() {
-
-        File f = new File(getClass().getClassLoader().getResource(this.cik_selected).getPath());
-        if (!f.exists()) {
-            return fetchCiks();
-        }
-
-        try {
-            InputStream inputStream = new FileInputStream(f);
-            return new ObjectMapper().readValue(inputStream, new TypeReference<HashMap<String, String>>() {});
-        } catch (IOException e) {
-            logger.error("{}():", new Object() {}.getClass().getEnclosingMethod().getName(), e);
-            return new HashMap<>();
-        }
-    }
-
-    private Map<String, String> fetchCiks() {
+    private Map<String, String> fetchCiks(List<String> tickers) {
         Map<String, String> map = new HashMap<>();
-        for (String ticker : ProgressBar.wrap(this.tickers, "fetchCiks")) {
+        for (String ticker : ProgressBar.wrap(tickers, "fetchCiks")) {
             this.req = new HttpGet(String.format(this.url_simple_browse, ticker));
             try {
                 this.response = this.client.execute(this.req);
@@ -117,9 +109,19 @@ public class Scraper {
             } catch (IOException e) {
                 logger.error("{}():", new Object() {}.getClass().getEnclosingMethod().getName(), e);
             }
-
         }
 
         return map;
     }
+
+    private Map<String, String> loadSelected(File jsonFile) {
+        try {
+            InputStream inputStream = new FileInputStream(jsonFile);
+            return new ObjectMapper().readValue(inputStream, new TypeReference<HashMap<String, String>>() {});
+        } catch (IOException e) {
+            logger.error("{}():", new Object() {}.getClass().getEnclosingMethod().getName(), e);
+            return new HashMap<>();
+        }
+    }
+
 }
