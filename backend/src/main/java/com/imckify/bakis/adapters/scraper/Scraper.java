@@ -1,19 +1,33 @@
 package com.imckify.bakis.adapters.scraper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import me.tongfei.progressbar.ProgressBar;
+import org.apache.http.Header;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,11 +36,18 @@ public class Scraper {
 
     private static final Logger logger = LoggerFactory.getLogger(Scraper.class);
 
-    List<String> exchanges = new ArrayList<String>() {{
+    private List<String> exchanges = new ArrayList<String>() {{
         add("NASDAQ");
         add("NYSE");
         add("AMEX");
     }};
+    private String cik_selected = "cik/ndx.json"; //  # "../data/cik/cik.json" or "../data/cik/cik3.json"
+    private String cik_excluded = "cik/cik_excluded.json";
+    private List<String> tickers = new ArrayList<>();
+
+    private Header header = new BasicHeader(HttpHeaders.USER_AGENT, "iMckify imckify@gmail.com");
+    private CloseableHttpClient client = HttpClients.custom().setDefaultHeaders(Collections.singletonList(header)).build();
+    private HttpUriRequest req = new HttpGet();
 
     private boolean saveExcludedCik = false;
     private boolean scrapeSecDoc = false;
@@ -39,14 +60,12 @@ public class Scraper {
     private String url_simple_browse = "http://www.sec.gov/cgi-bin/browse-edgar?CIK={}&Find=Search&owner=exclude&action=getcompany".replaceAll("\\{\\}", "%s");
     private String nasdaq = "https://old.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange={}&render=download".replaceAll("\\{\\}", "%s");
 
-    private Map.Entry<String, String> headers = new AbstractMap.SimpleEntry<String, String>("User-Agent", "iMckify imckify@gmail.com");
-
-
     @PostConstruct
-    private void runScript () {
+    private void runScript() {
         List<Ticker> allTickers = fetchTickers();
-        List<String> tickers = allTickers.stream().map(Ticker::getSymbol).distinct().collect(Collectors.toList());
-        logger.info(tickers.toString());
+        this.tickers = allTickers.stream().map(Ticker::getSymbol).distinct().collect(Collectors.toList());
+        Map<String, String> cik_dict = loadSelectedOrFetchCiks();
+        logger.info(cik_dict.toString());
     }
 
     private List<Ticker> fetchTickers() {
@@ -63,5 +82,42 @@ public class Scraper {
             }
         }
         return allTickers;
+    }
+
+    private Map<String, String> loadSelectedOrFetchCiks() {
+
+        File f = new File(getClass().getClassLoader().getResource(this.cik_selected).getPath());
+        if (!f.exists()) {
+            return fetchCiks();
+        }
+
+        try {
+            InputStream inputStream = new FileInputStream(f);
+            return new ObjectMapper().readValue(inputStream, new TypeReference<HashMap<String, String>>() {});
+        } catch (IOException e) {
+            logger.error("{}():", new Object() {}.getClass().getEnclosingMethod().getName(), e);
+            return new HashMap<>();
+        }
+    }
+
+    private Map<String, String> fetchCiks() {
+        Map<String, String> map = new HashMap<>();
+        for (String ticker : ProgressBar.wrap(this.tickers, "CIKS")) {
+            this.req = new HttpGet(String.format(this.url_simple_browse, ticker));
+            try (CloseableHttpResponse response = this.client.execute(this.req)) {
+                String json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+                Pattern p = Pattern.compile(".*CIK=(\\d{10}).*");
+                Matcher m = p.matcher(json);
+                if (m.find()) {
+                    String cik = m.group(1);
+                    map.put(ticker.toLowerCase(), cik);
+                }
+            } catch (IOException e) {
+                logger.error("{}():", new Object() {}.getClass().getEnclosingMethod().getName(), e);
+            }
+
+        }
+
+        return map;
     }
 }
