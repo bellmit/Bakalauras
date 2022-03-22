@@ -15,6 +15,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +27,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +47,7 @@ public class Scraper {
     private final CloseableHttpClient client = HttpClients.custom().setDefaultHeaders(Collections.singletonList(header)).build();
     private HttpUriRequest req = null;
     private CloseableHttpResponse response = null;
+    private String msg = "";
 
     private List<String> exchanges = new ArrayList<String>() {{
         add("NASDAQ");
@@ -69,7 +75,7 @@ public class Scraper {
         List<String> tickers = allCompanies.stream().map(CompanyListed::getSymbol).distinct().collect(Collectors.toList()); // .distinct()
 
         Map<String, String> ticker_cik;
-        File selectedJsonFile = new File(getClass().getClassLoader().getResource(this.cik_selected).getPath());
+        File selectedJsonFile = new File(getClass().getClassLoader().getResource(cik_selected).getPath());
         if (!selectedJsonFile.exists()) {
             ticker_cik = fetchCiks(tickers);
         } else {
@@ -89,7 +95,7 @@ public class Scraper {
             ticker_cik.remove(key);
         }
 
-        if (this.saveExcludedCik) {
+        if (saveExcludedCik) {
             saveExcludedCiks(excludedByCik);
         }
 
@@ -97,10 +103,14 @@ public class Scraper {
         logger.info("MODE: scrape");
 
         for (Map.Entry<String, String> tickerAndCik : ProgressBar.wrap(ticker_cik.entrySet(), "Scraper")) {
-            String ticker = tickerAndCik.getKey();
+            String ticker = tickerAndCik.getKey().toUpperCase();
             String cik = tickerAndCik.getValue();
 
-            Scrape10K(ticker, cik); // Todo from L:207 scraper.py
+            try {
+                Scrape10K(ticker, cik);
+            } catch (IOException ioException) {
+                logger.error("{}():", new Object() {}.getClass().getEnclosingMethod().getName(), ioException);
+            }
         }
 
         long duration = System.currentTimeMillis() - start;
@@ -109,7 +119,7 @@ public class Scraper {
 
     private List<CompanyListed> fetchTickers() {
         List<CompanyListed> allCompanies = new ArrayList<>();
-        for (String exchange : this.exchanges) {
+        for (String exchange : exchanges) {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(String.format("tickers/%s.csv", exchange.toLowerCase()));
             try {
                 MappingIterator<CompanyListed> companiesIter = new CsvMapper().readerWithTypedSchemaFor(CompanyListed.class).readValues(inputStream); // with JsonPropertyOrder instead of schema
@@ -126,10 +136,10 @@ public class Scraper {
     private Map<String, String> fetchCiks(List<String> tickers) {
         Map<String, String> map = new HashMap<>();
         for (String ticker : ProgressBar.wrap(tickers, "fetchCiks")) {
-            this.req = new HttpGet(String.format(this.url_simple_browse, ticker));
+            req = new HttpGet(String.format(url_simple_browse, ticker));
             try {
-                this.response = this.client.execute(this.req);
-                String json = EntityUtils.toString(this.response.getEntity(), StandardCharsets.UTF_8);
+                response = client.execute(req);
+                String json = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
                 Pattern p = Pattern.compile(".*CIK=(\\d{10}).*");
                 Matcher m = p.matcher(json);
                 if (m.find()) {
@@ -156,17 +166,43 @@ public class Scraper {
 
     private void saveExcludedCiks(Map<String, String> map) {
         try {
-            new ObjectMapper().writeValue(new File(String.valueOf(Paths.get("./backend/src/main/resources", this.cik_excluded))), map);
+            new ObjectMapper().writeValue(new File(String.valueOf(Paths.get("./backend/src/main/resources", cik_excluded))), map);
         } catch (IOException e) {
             logger.error("{}():", new Object() {}.getClass().getEnclosingMethod().getName(), e);
         }
     }
 
-    private void log (String text) {
-        logger.trace(text);
+    private void log (String s, Object... var2) {
+        int i = 0;
+        while(s.contains("{}")) {
+            s = s.replaceFirst(Pattern.quote("{}"), "{"+ i++ +"}");
+        }
+
+        this.msg = MessageFormat.format(s, var2);
+
+        logger.warn(this.msg);
     }
 
-    private void Scrape10K (String ticker, String cik) {
+    // Todo from L:228 scraper.py
+    private void Scrape10K (String ticker, String cik) throws IOException {
+        // prepare ticker dir
+        Path dir = Paths.get("./data/10K", ticker);
+        try {
+            Files.createDirectory(dir);
+        } catch (FileAlreadyExistsException e) {
+            FileUtils.cleanDirectory(new File(String.valueOf(dir)));
+        }
 
+        String url = String.format(url_base_10k_browse, cik);
+        req = new HttpGet(url);
+        response = client.execute(req);
+
+        if (response.getStatusLine().getStatusCode() != 200) {
+            FileUtils.deleteDirectory(new File(String.valueOf(dir)));
+            log("[ERROR] <{}> Browse not loaded. URL[{}]: {}\n", ticker, response.getStatusLine().getStatusCode(), url);
+            return;
+        }
+
+        System.out.println();
     }
 }
