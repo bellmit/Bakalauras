@@ -1,6 +1,7 @@
 package com.imckify.bakis.adapters.scraper;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -25,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -74,7 +76,25 @@ public class Scraper {
             ticker_cik = loadSelected(selectedJsonFile);
         }
 
-        logger.info(ticker_cik.toString()); // Todo from L:164 scraper.py
+        Map<String, String> excludedByCik = new HashMap<>();
+        Set<String> ciksUnique = new HashSet<>();
+        for (Map.Entry<String, String> pair : ticker_cik.entrySet()) {
+            if (!ciksUnique.add(pair.getValue())) {
+                excludedByCik.put(pair.getKey(), pair.getValue());
+            }
+        }
+
+        // df.drop_duplicates(subset='cik', keep='first', inplace=True)
+        for (String key : excludedByCik.keySet()) {
+            ticker_cik.remove(key);
+        }
+
+        if (this.saveExcludedCik) {
+            saveExcludedCiks(excludedByCik);
+        }
+
+        logger.info(ticker_cik.toString()); // Todo from L:367 scraper.py
+
     }
 
     private List<CompanyListed> fetchTickers() {
@@ -121,6 +141,14 @@ public class Scraper {
         } catch (IOException e) {
             logger.error("{}():", new Object() {}.getClass().getEnclosingMethod().getName(), e);
             return new HashMap<>();
+        }
+    }
+
+    private void saveExcludedCiks(Map<String, String> map) {
+        try {
+            new ObjectMapper().writeValue(new File(String.valueOf(Paths.get("./backend/src/main/resources", this.cik_excluded))), map);
+        } catch (IOException e) {
+            logger.error("{}():", new Object() {}.getClass().getEnclosingMethod().getName(), e);
         }
     }
 
