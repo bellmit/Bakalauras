@@ -93,8 +93,18 @@ public class Scraper {
             saveExcludedCiks(excludedByCik);
         }
 
-        logger.info(ticker_cik.toString()); // Todo from L:367 scraper.py
+        long start = System.currentTimeMillis();
+        logger.info("MODE: scrape");
 
+        for (Map.Entry<String, String> tickerAndCik : ProgressBar.wrap(ticker_cik.entrySet(), "Scraper")) {
+            String ticker = tickerAndCik.getKey();
+            String cik = tickerAndCik.getValue();
+
+            Scrape10K(ticker, cik); // Todo from L:207 scraper.py
+        }
+
+        long duration = System.currentTimeMillis() - start;
+        logger.info("Executed Scraper {}() in {}s", new Object(){}.getClass().getEnclosingMethod().getName(), duration/1000);
     }
 
     private List<CompanyListed> fetchTickers() {
@@ -152,4 +162,11 @@ public class Scraper {
         }
     }
 
+    private void log (String text) {
+        logger.trace(text);
+    }
+
+    private void Scrape10K (String ticker, String cik) {
+
+    }
 }
